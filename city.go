@@ -4,25 +4,24 @@ import "fmt"
 
 type Cities []*City
 
-type Region string
-
-const (
-	Blue   Region = "Blue"
-	Red    Region = "Red"
-	Yellow Region = "Yellow"
-	Black  Region = "Black"
-)
-
 type City struct {
 	Name       string
-	VirusCount map[string]int
+	VirusCount map[VirusType]int
 	Buildings  map[string]bool
 	Links      []string
-	Region     Region
+	VirusType  VirusType
 }
 
 func (s City) String() string {
-	return fmt.Sprintf("%s(%s)", s.Name, s.Links)
+	out := fmt.Sprintf("|%s%s", s.Name, s.Links)
+	for virus, count := range s.VirusCount {
+		if count > 0 {
+			out += fmt.Sprintf("%s{%d}", string(virus[0]), count)
+		}
+	}
+
+	out += "|"
+	return out
 }
 
 func (s Cities) FindCityByName(name string) *City {

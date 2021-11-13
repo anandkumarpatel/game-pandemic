@@ -1,5 +1,14 @@
 package main
 
+type VirusType string
+
+const (
+	Blue   VirusType = "Blue"
+	Red    VirusType = "Red"
+	Yellow VirusType = "Yellow"
+	Black  VirusType = "Black"
+)
+
 type VirusStatus int
 
 const (
@@ -8,9 +17,4 @@ const (
 	EradicatedVirusStatus
 )
 
-type Viruses struct {
-	Blue   VirusStatus
-	Red    VirusStatus
-	Yellow VirusStatus
-	Black  VirusStatus
-}
+type Viruses map[VirusType]VirusStatus

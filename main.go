@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -77,6 +78,13 @@ func genCities() Cities {
 	for _, cityDef := range cityMap {
 		cities = append(cities, &City{
 			Name: cityDef.Name,
+			VirusCount: map[VirusType]int{
+				Blue:   0,
+				Red:    0,
+				Yellow: 0,
+				Black:  0,
+			},
+			VirusType: Black,
 		})
 	}
 
@@ -174,17 +182,12 @@ func main() {
 			state.Turn.Step = ActionStep
 			continue
 		case ActionStep:
-			fmt.Printf("XX Count %d, True? %b", state.Turn.ActionCount, state.Turn.ActionCount < 1)
 			if state.Turn.ActionCount < 1 {
 				state.Turn.DrawCount = 2
 				state.Turn.Step = DrawStep
-				fmt.Println("XX here")
 				continue
 			}
 		case DrawStep:
-			card := decks.PDeck.Draw()
-			state.Turn.CurrentPlayer.Hand.AddCard(card)
-			state.Turn.DrawCount--
 			// TODO pandemic card
 			if state.Turn.DrawCount < 1 {
 				state.Turn.Step = DiscardStep
@@ -197,13 +200,9 @@ func main() {
 				continue
 			}
 		case InfectionStep:
-			state.Turn.InfectCount--
 			if state.Turn.InfectCount < 1 {
 				state.Turn.Step = NextPlayerStep
 				continue
-			}
-			if err := state.Do("infect", ""); err != nil {
-				panic(err)
 			}
 		case NextPlayerStep:
 			firstPlayer = (firstPlayer + 1) % playerCount
@@ -220,25 +219,45 @@ func main() {
 	}
 }
 
+type DoMap [][]string
+
+func (s DoMap) String() string {
+	out := ""
+	for i, do := range s {
+		out += fmt.Sprintf("%d\tplayer (%s) action %s target %s\n", i, do[2], do[0], do[1])
+	}
+	return out
+}
+
+func (s *DoMap) Len() int {
+	return len(*s)
+}
+func (s *DoMap) Swap(i, j int) {
+	(*s)[i], (*s)[j] = (*s)[j], (*s)[i]
+}
+func (s *DoMap) Less(i, j int) bool {
+	return (*s)[i][0] < (*s)[j][0]
+}
+
 func doInput(state *State) {
 	actions := state.GetActions()
-	count := 0
-	do := [][]string{}
+	do := DoMap{}
 	for player, actions := range actions {
 		for action, targets := range actions {
 			for _, target := range targets {
-				fmt.Printf("%d\tplayer (%s) action %s target %s\n", count, player, action, target)
-				do = append(do, []string{string(action), target})
-				count++
+				do = append(do, []string{string(action), target, player})
 			}
 		}
 	}
+
+	sort.Sort(&do)
+	fmt.Println(do)
 	fmt.Printf("Enter Option: \n\n")
 	for {
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
 		num, err := strconv.Atoi(strings.Trim(text, "\n"))
-		if err != nil {
+		if err != nil || num > len(do) {
 			fmt.Printf("invalid input  (%s,%d) : try again \n", text, num)
 			continue
 		}

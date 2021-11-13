@@ -61,6 +61,8 @@ func (s *State) Do(action string, target string) error {
 		s.FlyToAction(target)
 	case DiscardAction:
 		s.DiscardAction(target)
+	case DrawPAction:
+		s.DrawPAction()
 	case InfectAction:
 		s.InfectAction()
 	default:
@@ -87,11 +89,18 @@ func (s *State) DiscardAction(cityName string) {
 	s.Decks.PDiscard.AddCard(card)
 }
 
+func (s *State) DrawPAction() {
+	card := s.Decks.PDeck.Draw()
+	s.Turn.CurrentPlayer.Hand.AddCard(card)
+	s.Turn.DrawCount--
+}
+
 func (s *State) InfectAction() {
 	card := s.Decks.VDeck.Draw()
 	city := s.Cities.FindCityByName(card.Name)
-	city.VirusCount[string(card.City.Region)]++
+	city.VirusCount[card.City.VirusType]++
 	s.Decks.VDiscard.AddCard(card)
+	s.Turn.InfectCount--
 }
 
 type ActionMap map[Action]([]string)
@@ -99,14 +108,24 @@ type PlayersActions map[string]ActionMap
 
 func (s *State) GetActions() PlayersActions {
 	out := PlayersActions{}
-	if s.Turn.ActionCount == 0 {
-		out[s.Turn.CurrentPlayer.Name] = ActionMap{}
-		out[s.Turn.CurrentPlayer.Name][DrawPAction] = []string{"draw"}
-		return out
-	}
 	for _, player := range s.Players {
-		if player.Name == s.Turn.CurrentPlayer.Name {
-			out[player.Name] = ActionMap{}
+		out[player.Name] = ActionMap{}
+	}
+
+	if s.Turn.Step == InfectionStep {
+		out[s.Turn.CurrentPlayer.Name][InfectAction] = []string{"draw"}
+	}
+
+	if s.Turn.Step == DrawStep {
+		out[s.Turn.CurrentPlayer.Name][DrawPAction] = []string{"draw"}
+	}
+
+	if s.Turn.Step == DiscardStep {
+		out[s.Turn.CurrentPlayer.Name][DiscardAction] = []string{"discard"}
+	}
+
+	for _, player := range s.Players {
+		if player.Name == s.Turn.CurrentPlayer.Name && s.Turn.Step == ActionStep {
 			playerLocation := s.Cities.FindCityByName(player.Location)
 			if playerLocation == nil {
 				panic(fmt.Errorf("cant find player location %s", player))
