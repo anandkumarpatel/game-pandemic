@@ -19,7 +19,6 @@ type Decks struct {
 
 func setupPlayerDeck(deck *Deck, epidemicCount int) {
 	newDecks := make([]Deck, epidemicCount)
-	deck.Shuffle()
 	for i, c := range deck.Cards {
 		newDecks[i%epidemicCount].AddCard(c)
 	}
@@ -33,10 +32,6 @@ func setupPlayerDeck(deck *Deck, epidemicCount int) {
 		deck.AddDeck(&newDecks[i])
 	}
 
-}
-
-func setupVirusDeck(deck *Deck) {
-	deck.Shuffle()
 }
 
 func genCities() Cities {
@@ -113,8 +108,9 @@ func genDecks(cities Cities, epidemicCount int) Decks {
 		decks.VDeck.AddCard(card)
 		decks.PDeck.AddCard(card)
 	}
+	decks.VDeck.Shuffle()
+	decks.PDeck.Shuffle()
 	// TODO: add event cards
-	setupVirusDeck(decks.PDeck)
 	return decks
 }
 
