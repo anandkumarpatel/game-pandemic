@@ -20,6 +20,7 @@ type State struct {
 	Decks          Decks
 	InfectionLevel int
 	Turn           *Turn
+	OutbreakCount  int
 }
 
 func (s State) String() string {
@@ -51,6 +52,7 @@ const (
 	NextAction        Action = "next"
 	DrawPAction       Action = "drawP"
 	ResearchAction    Action = "reseach"
+	OutbreakAction    Action = "outbreak"
 )
 
 func (a Action) String() string {
@@ -68,7 +70,7 @@ func (s *State) Do(action string, target string) error {
 	case DrawPAction:
 		s.DrawPAction()
 	case InfectAction:
-		s.InfectAction()
+		s.InfectAction(1)
 	case CureAction:
 		s.CureAction(target)
 	case BuildAction:
@@ -80,6 +82,14 @@ func (s *State) Do(action string, target string) error {
 	}
 
 	return nil
+}
+
+func (s *State) SetupVirus() {
+	for i := 3; i > 0; i-- {
+		for j := 0; j < 3; j++ {
+			s.InfectAction(i)
+		}
+	}
 }
 
 func (s *State) ResearchAction(target string) {
@@ -148,11 +158,10 @@ func (s *State) DrawPAction() {
 	s.Turn.DrawCount--
 }
 
-func (s *State) InfectAction() {
+func (s *State) InfectAction(count int) {
 	card := s.Decks.VDeck.Draw()
 	if s.Viruses[card.City.VirusType] != EradicatedVirusStatus {
-		city := s.Cities.FindCityByName(card.Name)
-		city.VirusCounts[card.City.VirusType]++
+		card.City.VirusCounts[card.City.VirusType] += count
 	}
 	s.Decks.VDiscard.AddCard(card)
 	s.Turn.InfectCount--
@@ -165,6 +174,10 @@ func (s *State) GetActions() PlayersActions {
 	out := PlayersActions{}
 	for _, player := range s.Players {
 		out[player.Name] = ActionMap{}
+	}
+	hasOutbreak := s.Cities.HasOutbreak()
+	if hasOutbreak {
+		out[s.Turn.CurrentPlayer.Name][OutbreakAction] = []string{"draw"}
 	}
 
 	if s.Turn.Step == InfectionStep {
@@ -180,11 +193,14 @@ func (s *State) GetActions() PlayersActions {
 	}
 
 	for _, player := range s.Players {
-		if player.Name == s.Turn.CurrentPlayer.Name && s.Turn.Step == ActionStep {
+		if player.Name == s.Turn.CurrentPlayer.Name && s.Turn.Step == ActionStep && !hasOutbreak {
 			playerCity := s.Cities.FindCityByName(player.Location)
 			if playerCity.Buildings[ResearchBuilding] {
 				groups := player.Hand.HasN(3)
 				for virus, deck := range groups {
+					if s.Viruses[virus] != NoneVirusStatus {
+						continue
+					}
 					r := append([]string{string(virus)}, deck.CardNames()...)
 					out[player.Name][ResearchAction] = append(out[player.Name][ResearchAction], strings.Join(r, ":"))
 				}

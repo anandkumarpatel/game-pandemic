@@ -71,16 +71,17 @@ func genCities() Cities {
 
 	cities := Cities{}
 	for _, cityDef := range cityMap {
+
 		cities = append(cities, &City{
 			Name: cityDef.Name,
 			VirusCounts: VirusCounts{
-				Blue:   1,
-				Red:    1,
-				Yellow: 1,
-				Black:  1,
+				Blue:   0,
+				Red:    0,
+				Yellow: 0,
+				Black:  3,
 			},
 			Buildings: Buildings{
-				ResearchBuilding: true,
+				ResearchBuilding: false,
 			},
 			VirusType: Black,
 		})
@@ -90,6 +91,8 @@ func genCities() Cities {
 		city := cities.FindCityByName(cityDef.Name)
 		city.Links = append(city.Links, cityDef.Links...)
 	}
+
+	cities[0].Buildings[ResearchBuilding] = true
 	return cities
 }
 
@@ -170,7 +173,8 @@ func main() {
 		Cities:         cities,
 		Viruses:        viruses,
 		Decks:          decks,
-		InfectionLevel: 2,
+		InfectionLevel: 3,
+		OutbreakCount:  0,
 		Turn: &Turn{
 			CurrentPlayer: players[firstPlayer],
 			ActionCount:   4,
@@ -178,6 +182,8 @@ func main() {
 			DrawCount:     0,
 		},
 	}
+
+	state.SetupVirus()
 
 	for {
 		if state.HasWon() {

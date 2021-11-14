@@ -64,8 +64,7 @@ func (s Cities) FindCityByName(name string) *City {
 		}
 	}
 
-	panic(fmt.Errorf("cant find city %s", name))
-	// return nil
+	panic(fmt.Errorf("FindCityByName: cant find city %s", name))
 }
 
 func (s Cities) Strings() []string {
@@ -84,4 +83,28 @@ func (s Cities) IsEradicated(v VirusType) bool {
 	}
 
 	return true
+}
+
+func (s Cities) HasOutbreak() bool {
+	for _, city := range s {
+		for _, count := range city.VirusCounts {
+			if count > 3 {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func (s Cities) FindOutbreak() *City {
+	for _, city := range s {
+		for _, count := range city.VirusCounts {
+			if count > 3 {
+				return city
+			}
+		}
+	}
+
+	panic("FindOutbreak: cant find a city with outbreak")
 }
