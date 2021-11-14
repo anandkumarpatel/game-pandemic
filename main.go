@@ -41,7 +41,7 @@ func genCities() Cities {
 	}
 
 	var cityMap = []cityDef{
-		{"a", []string{"b"}},
+		{"a", []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}},
 		{"b", []string{"a"}},
 		{"c", []string{}},
 		{"d", []string{}},
@@ -73,11 +73,14 @@ func genCities() Cities {
 	for _, cityDef := range cityMap {
 		cities = append(cities, &City{
 			Name: cityDef.Name,
-			VirusCount: map[VirusType]int{
-				Blue:   0,
-				Red:    0,
-				Yellow: 0,
-				Black:  0,
+			VirusCounts: VirusCounts{
+				Blue:   1,
+				Red:    1,
+				Yellow: 1,
+				Black:  1,
+			},
+			Buildings: Buildings{
+				ResearchBuilding: false,
 			},
 			VirusType: Black,
 		})
@@ -159,7 +162,7 @@ func main() {
 	state := State{
 		Players:        players,
 		Cities:         cities,
-		Virus:          viruses,
+		Viruses:        viruses,
 		Decks:          decks,
 		InfectionLevel: 2,
 		Turn: &Turn{
@@ -204,8 +207,9 @@ func main() {
 			firstPlayer = (firstPlayer + 1) % playerCount
 			state.Turn.CurrentPlayer = players[firstPlayer]
 			state.Turn.Step = StartStep
+			continue
 		default:
-			panic(fmt.Errorf("invalid action: %d", state.Turn.Step))
+			panic(fmt.Errorf("invalid action: %s", state.Turn.Step))
 		}
 
 		fmt.Println(state)
@@ -253,7 +257,7 @@ func doInput(state *State) {
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
 		num, err := strconv.Atoi(strings.Trim(text, "\n"))
-		if err != nil || num > len(do) {
+		if err != nil || num >= do.Len() {
 			fmt.Printf("invalid input  (%s,%d) : try again \n", text, num)
 			continue
 		}

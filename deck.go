@@ -14,6 +14,14 @@ func (s Deck) String() string {
 	return fmt.Sprintf("size: %d %s", len(s.Cards), s.Cards)
 }
 
+func (s Deck) CardNames() []string {
+	out := []string{}
+	for _, card := range s.Cards {
+		out = append(out, card.Name)
+	}
+	return out
+}
+
 func (s Deck) Count() int {
 	return len(s.Cards)
 }

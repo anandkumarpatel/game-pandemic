@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Turn struct {
 	CurrentPlayer *Player
@@ -13,7 +16,7 @@ type Turn struct {
 type State struct {
 	Players        []*Player
 	Cities         Cities
-	Virus          Viruses
+	Viruses        Viruses
 	Decks          Decks
 	InfectionLevel int
 	Turn           *Turn
@@ -25,7 +28,7 @@ func (s State) String() string {
 		out += fmt.Sprintf("Player(%d) %s\n", i, p)
 	}
 	out += fmt.Sprintf("Cities %s\n", s.Cities)
-	out += fmt.Sprintf("Virus %v\n", s.Virus)
+	out += fmt.Sprintf("Viruses %v\n", s.Viruses)
 	out += fmt.Sprintf("PDeck %s\n", s.Decks.PDeck)
 	out += fmt.Sprintf("VDeck %s\n", s.Decks.VDeck)
 	out += fmt.Sprintf("PDiscard %s\n", s.Decks.PDiscard)
@@ -46,7 +49,8 @@ const (
 	DiscardAction     Action = "discard"
 	InfectAction      Action = "infect"
 	NextAction        Action = "next"
-	DrawPAction       Action = "DrawPAction"
+	DrawPAction       Action = "drawP"
+	ResearchAction    Action = "reseach"
 )
 
 func (a Action) String() string {
@@ -65,11 +69,29 @@ func (s *State) Do(action string, target string) error {
 		s.DrawPAction()
 	case InfectAction:
 		s.InfectAction()
+	case CureAction:
+		s.CureAction(target)
+	case BuildAction:
+		s.BuildAction(target)
+	case ResearchAction:
+		s.ResearchAction(target)
 	default:
 		return fmt.Errorf("invalid action: %s", action)
 	}
 
 	return nil
+}
+
+func (s *State) ResearchAction(target string) {
+	// First split is always virus
+	split := strings.Split(target, ":")
+	virusName := split[0]
+	for i := 1; i < len(split); i++ {
+		card := s.Turn.CurrentPlayer.Hand.RemoveCard(split[i])
+		s.Decks.PDiscard.AddCard(card)
+	}
+	s.Viruses[VirusType(virusName)] = CuredVirusStatus
+	s.Turn.ActionCount--
 }
 
 func (s *State) MoveAction(cityName string) {
@@ -89,6 +111,22 @@ func (s *State) DiscardAction(cityName string) {
 	s.Decks.PDiscard.AddCard(card)
 }
 
+func (s *State) CureAction(target string) {
+	split := strings.Split(target, ":")
+	cityName, virusName := split[0], split[1]
+	s.Cities.FindCityByName(cityName).VirusCounts[VirusType(virusName)]--
+	s.Turn.ActionCount--
+}
+
+func (s *State) BuildAction(target string) {
+	split := strings.Split(target, ":")
+	cityName, buildName := split[0], split[1]
+	card := s.Turn.CurrentPlayer.Hand.RemoveCard(cityName)
+	s.Decks.PDiscard.AddCard(card)
+	s.Cities.FindCityByName(cityName).Buildings[Building(buildName)] = true
+	s.Turn.ActionCount--
+}
+
 func (s *State) DrawPAction() {
 	card := s.Decks.PDeck.Draw()
 	s.Turn.CurrentPlayer.Hand.AddCard(card)
@@ -98,7 +136,7 @@ func (s *State) DrawPAction() {
 func (s *State) InfectAction() {
 	card := s.Decks.VDeck.Draw()
 	city := s.Cities.FindCityByName(card.Name)
-	city.VirusCount[card.City.VirusType]++
+	city.VirusCounts[card.City.VirusType]++
 	s.Decks.VDiscard.AddCard(card)
 	s.Turn.InfectCount--
 }
@@ -121,25 +159,31 @@ func (s *State) GetActions() PlayersActions {
 	}
 
 	if s.Turn.Step == DiscardStep {
-		out[s.Turn.CurrentPlayer.Name][DiscardAction] = []string{"discard"}
+		out[s.Turn.CurrentPlayer.Name][DiscardAction] = s.Turn.CurrentPlayer.Hand.CardNames()
 	}
 
 	for _, player := range s.Players {
 		if player.Name == s.Turn.CurrentPlayer.Name && s.Turn.Step == ActionStep {
-			playerLocation := s.Cities.FindCityByName(player.Location)
-			if playerLocation == nil {
+			playerCity := s.Cities.FindCityByName(player.Location)
+			if playerCity == nil {
 				panic(fmt.Errorf("cant find player location %s", player))
 			}
-			out[player.Name][MoveAction] = playerLocation.Links
-			out[player.Name][CureAction] = []string{playerLocation.Name}
+			out[player.Name][MoveAction] = playerCity.Links
+			if playerCity.HasVirus() {
+				cureing := []string{}
+				for virusName, _ := range playerCity.GetActive() {
+					cureing = append(cureing, player.Location+":"+string(virusName))
+				}
+				out[player.Name][CureAction] = cureing
+			}
 
 			for _, card := range player.Hand.Cards {
 				switch card.Type {
 				case CityCardType:
 					out[player.Name][FlyToAction] = append(out[player.Name][FlyToAction], card.City.Name)
-					if card.City.Name == playerLocation.Name {
-						out[player.Name][FlyAnywhereAction] = []string{playerLocation.Name}
-						out[player.Name][BuildAction] = []string{playerLocation.Name}
+					if card.City.Name == player.Location {
+						out[player.Name][FlyAnywhereAction] = []string{player.Location}
+						out[player.Name][BuildAction] = []string{player.Location + ":" + string(ResearchBuilding)}
 					}
 
 				}
