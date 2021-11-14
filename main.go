@@ -41,32 +41,32 @@ func genCities() Cities {
 	}
 
 	var cityMap = []cityDef{
-		{"a", []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}},
-		{"b", []string{"a"}},
-		{"c", []string{}},
-		{"d", []string{}},
-		{"e", []string{}},
-		{"f", []string{}},
-		{"g", []string{}},
-		{"h", []string{}},
-		{"i", []string{}},
-		{"j", []string{}},
-		{"k", []string{}},
-		{"l", []string{}},
-		{"m", []string{}},
-		{"n", []string{}},
-		{"o", []string{}},
-		{"p", []string{}},
-		{"q", []string{}},
-		{"r", []string{}},
-		{"s", []string{}},
-		{"t", []string{}},
-		{"u", []string{}},
-		{"v", []string{}},
-		{"w", []string{}},
-		{"x", []string{}},
-		{"y", []string{}},
-		{"z", []string{}},
+		{"a", []string{"b", "z"}},
+		{"b", []string{"a", "c"}},
+		{"c", []string{"b", "d"}},
+		{"d", []string{"c", "e"}},
+		{"e", []string{"d", "f"}},
+		{"f", []string{"e", "g"}},
+		{"g", []string{"f", "h"}},
+		{"h", []string{"g", "i"}},
+		{"i", []string{"h", "j"}},
+		{"j", []string{"i", "k"}},
+		{"k", []string{"j", "l"}},
+		{"l", []string{"k", "m"}},
+		{"m", []string{"l", "n"}},
+		{"n", []string{"m", "o"}},
+		{"o", []string{"n", "p"}},
+		{"p", []string{"o", "q"}},
+		{"q", []string{"p", "r"}},
+		{"r", []string{"q", "s"}},
+		{"s", []string{"r", "t"}},
+		{"t", []string{"s", "u"}},
+		{"u", []string{"t", "v"}},
+		{"v", []string{"u", "w"}},
+		{"w", []string{"v", "x"}},
+		{"x", []string{"w", "y"}},
+		{"y", []string{"x", "z"}},
+		{"z", []string{"y", "a"}},
 	}
 
 	cities := Cities{}
@@ -93,6 +93,7 @@ func genCities() Cities {
 	}
 
 	cities[0].Buildings[ResearchBuilding] = true
+	cities[0].VirusCounts[Black] = 4
 	return cities
 }
 

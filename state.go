@@ -21,6 +21,7 @@ type State struct {
 	InfectionLevel int
 	Turn           *Turn
 	OutbreakCount  int
+	OutbreakCities Cities
 }
 
 func (s State) String() string {
@@ -77,6 +78,8 @@ func (s *State) Do(action string, target string) error {
 		s.BuildAction(target)
 	case ResearchAction:
 		s.ResearchAction(target)
+	case OutbreakAction:
+		s.OutbreakAction(target)
 	default:
 		return fmt.Errorf("invalid action: %s", action)
 	}
@@ -139,7 +142,25 @@ func (s *State) CureAction(target string) {
 	s.Turn.ActionCount--
 }
 
+func (s *State) OutbreakAction(target string) {
+	s.OutbreakCount++
+	city := s.Cities.FindCityByName(target)
+	virus := city.GetOutbreak()
+	city.VirusCounts[virus] = 3
+	for _, name := range city.Links {
+		if s.OutbreakCities.Contains(name) {
+			continue
+		}
+		nCity := s.Cities.FindCityByName(name)
+		nCity.VirusCounts[virus]++
+	}
+	s.OutbreakCities = append(s.OutbreakCities, city)
+}
+
 func (s State) HasWon() bool {
+	if s.OutbreakCount > 8 {
+		panic("LOST: To many outbreak")
+	}
 	return s.Viruses.AllCured()
 }
 
@@ -177,7 +198,10 @@ func (s *State) GetActions() PlayersActions {
 	}
 	hasOutbreak := s.Cities.HasOutbreak()
 	if hasOutbreak {
-		out[s.Turn.CurrentPlayer.Name][OutbreakAction] = []string{"draw"}
+		oCity := s.Cities.FindOutbreakCity()
+		out[s.Turn.CurrentPlayer.Name][OutbreakAction] = []string{oCity.Name}
+	} else {
+		s.OutbreakCities = Cities{}
 	}
 
 	if s.Turn.Step == InfectionStep {

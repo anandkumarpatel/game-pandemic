@@ -57,14 +57,34 @@ func (s City) GetActive() VirusCounts {
 	return out
 }
 
+func (s City) GetOutbreak() VirusType {
+	for virus, count := range s.VirusCounts {
+		if count > 3 {
+			return virus
+		}
+	}
+
+	panic("GetOutbreak: Could not find outbreak")
+}
+
 func (s Cities) FindCityByName(name string) *City {
-	for _, v := range s {
-		if v.Name == name {
-			return v
+	for _, city := range s {
+		if city.Name == name {
+			return city
 		}
 	}
 
 	panic(fmt.Errorf("FindCityByName: cant find city %s", name))
+}
+
+func (s Cities) Contains(name string) bool {
+	for _, city := range s {
+		if city.Name == name {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (s Cities) Strings() []string {
@@ -97,7 +117,7 @@ func (s Cities) HasOutbreak() bool {
 	return false
 }
 
-func (s Cities) FindOutbreak() *City {
+func (s Cities) FindOutbreakCity() *City {
 	for _, city := range s {
 		for _, count := range city.VirusCounts {
 			if count > 3 {
