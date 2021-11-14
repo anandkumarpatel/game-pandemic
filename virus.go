@@ -18,3 +18,13 @@ const (
 )
 
 type Viruses map[VirusType]VirusStatus
+
+func (s Viruses) AllCured() bool {
+	for _, status := range s {
+		if status == NoneVirusStatus {
+			return false
+		}
+	}
+
+	return true
+}

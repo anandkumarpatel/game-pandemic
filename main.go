@@ -80,7 +80,7 @@ func genCities() Cities {
 				Black:  1,
 			},
 			Buildings: Buildings{
-				ResearchBuilding: false,
+				ResearchBuilding: true,
 			},
 			VirusType: Black,
 		})
@@ -103,9 +103,10 @@ func genDecks(cities Cities, epidemicCount int) Decks {
 
 	for _, city := range cities {
 		card := &Card{
-			Type: CityCardType,
-			Name: city.Name,
-			City: city,
+			Type:      CityCardType,
+			Name:      city.Name,
+			City:      city,
+			VirusType: Black,
 		}
 
 		decks.VDeck.AddCard(card)
@@ -157,7 +158,12 @@ func main() {
 	setupPlayerDeck(decks.PDeck, epidemicCount)
 	firstPlayer := rand.Int() % playerCount
 
-	viruses := Viruses{}
+	viruses := Viruses{
+		Black:  NoneVirusStatus,
+		Blue:   NoneVirusStatus,
+		Yellow: NoneVirusStatus,
+		Red:    NoneVirusStatus,
+	}
 
 	state := State{
 		Players:        players,
@@ -174,6 +180,9 @@ func main() {
 	}
 
 	for {
+		if state.HasWon() {
+			panic("HAS WON")
+		}
 		fmt.Printf("start step %s\n", state.Turn.Step)
 		switch state.Turn.Step {
 		case StartStep:

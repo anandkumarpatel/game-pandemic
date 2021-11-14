@@ -17,10 +17,11 @@ const (
 )
 
 type Card struct {
-	Name  string
-	Bonus CardBonus
-	Type  CardType
-	City  *City
+	Name      string
+	Bonus     CardBonus
+	Type      CardType
+	VirusType VirusType
+	City      *City
 }
 
 func (s Card) String() string {

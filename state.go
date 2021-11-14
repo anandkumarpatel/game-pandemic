@@ -90,7 +90,12 @@ func (s *State) ResearchAction(target string) {
 		card := s.Turn.CurrentPlayer.Hand.RemoveCard(split[i])
 		s.Decks.PDiscard.AddCard(card)
 	}
-	s.Viruses[VirusType(virusName)] = CuredVirusStatus
+	v := VirusType(virusName)
+	s.Viruses[v] = CuredVirusStatus
+
+	if s.Cities.IsEradicated(v) {
+		s.Viruses[v] = EradicatedVirusStatus
+	}
 	s.Turn.ActionCount--
 }
 
@@ -114,8 +119,18 @@ func (s *State) DiscardAction(cityName string) {
 func (s *State) CureAction(target string) {
 	split := strings.Split(target, ":")
 	cityName, virusName := split[0], split[1]
-	s.Cities.FindCityByName(cityName).VirusCounts[VirusType(virusName)]--
+	v := VirusType(virusName)
+
+	city := s.Cities.FindCityByName(cityName)
+	city.VirusCounts[v]--
+	if s.Cities.IsEradicated(v) {
+		s.Viruses[v] = EradicatedVirusStatus
+	}
 	s.Turn.ActionCount--
+}
+
+func (s State) HasWon() bool {
+	return s.Viruses.AllCured()
 }
 
 func (s *State) BuildAction(target string) {
@@ -135,8 +150,10 @@ func (s *State) DrawPAction() {
 
 func (s *State) InfectAction() {
 	card := s.Decks.VDeck.Draw()
-	city := s.Cities.FindCityByName(card.Name)
-	city.VirusCounts[card.City.VirusType]++
+	if s.Viruses[card.City.VirusType] != EradicatedVirusStatus {
+		city := s.Cities.FindCityByName(card.Name)
+		city.VirusCounts[card.City.VirusType]++
+	}
 	s.Decks.VDiscard.AddCard(card)
 	s.Turn.InfectCount--
 }
@@ -165,13 +182,17 @@ func (s *State) GetActions() PlayersActions {
 	for _, player := range s.Players {
 		if player.Name == s.Turn.CurrentPlayer.Name && s.Turn.Step == ActionStep {
 			playerCity := s.Cities.FindCityByName(player.Location)
-			if playerCity == nil {
-				panic(fmt.Errorf("cant find player location %s", player))
+			if playerCity.Buildings[ResearchBuilding] {
+				groups := player.Hand.HasN(3)
+				for virus, deck := range groups {
+					r := append([]string{string(virus)}, deck.CardNames()...)
+					out[player.Name][ResearchAction] = append(out[player.Name][ResearchAction], strings.Join(r, ":"))
+				}
 			}
 			out[player.Name][MoveAction] = playerCity.Links
 			if playerCity.HasVirus() {
 				cureing := []string{}
-				for virusName, _ := range playerCity.GetActive() {
+				for virusName := range playerCity.GetActive() {
 					cureing = append(cureing, player.Location+":"+string(virusName))
 				}
 				out[player.Name][CureAction] = cureing

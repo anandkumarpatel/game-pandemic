@@ -64,7 +64,8 @@ func (s Cities) FindCityByName(name string) *City {
 		}
 	}
 
-	return nil
+	panic(fmt.Errorf("cant find city %s", name))
+	// return nil
 }
 
 func (s Cities) Strings() []string {

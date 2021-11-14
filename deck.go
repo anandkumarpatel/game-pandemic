@@ -34,6 +34,27 @@ func (s *Deck) AddDeck(deck *Deck) {
 	s.Cards = append(s.Cards, deck.Cards...)
 }
 
+func (s *Deck) HasN(n int) map[VirusType]*Deck {
+	out := map[VirusType]*Deck{
+		Black:  {},
+		Blue:   {},
+		Yellow: {},
+		Red:    {},
+	}
+
+	for _, card := range s.Cards {
+		out[card.VirusType].AddCard(card)
+	}
+
+	for virus, deck := range out {
+		if deck.Count() < n {
+			delete(out, virus)
+		}
+	}
+
+	return out
+}
+
 func (s *Deck) Draw() *Card {
 	out := s.Cards[0]
 	s.RemoveCard(out.Name)
