@@ -176,6 +176,13 @@ func (s *State) OutbreakAction(target string) {
 }
 
 func (s State) HasWon() bool {
+	// TODO check # virus
+	if s.Decks.VDeck.Count() < 1 {
+		panic("LOST: No more Virus Cards")
+	}
+	if s.Decks.PDeck.Count() < 1 {
+		panic("LOST: No more Player Cards")
+	}
 	if s.OutbreakCount > 8 {
 		panic("LOST: To many outbreak")
 	}
