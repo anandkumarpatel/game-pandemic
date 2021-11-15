@@ -1,11 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"os"
 	"strings"
 )
 
 type Turn struct {
+	FirstPlayer   int
 	CurrentPlayer *Player
 	ActionCount   int
 	Step          Step
@@ -69,6 +73,8 @@ func (s *State) Do(action string, target string) error {
 		s.MoveAction(target)
 	case FlyToAction:
 		s.FlyToAction(target)
+	case FlyAnywhereAction:
+		s.FlyAnywhereAction(target)
 	case DiscardAction:
 		s.DiscardAction(target)
 	case DrawPAction:
@@ -159,6 +165,13 @@ func (s *State) EpidemicAction() {
 	s.Decks.VDiscard.Clear()
 }
 
+func (s *State) FlyAnywhereAction(cityName string) {
+	card := s.Turn.CurrentPlayer.Hand.RemoveCard(s.Turn.CurrentPlayer.Location)
+	s.Decks.PDiscard.AddCard(card)
+	s.Turn.CurrentPlayer.Move(cityName)
+	s.Turn.ActionCount--
+}
+
 func (s *State) FlyToAction(cityName string) {
 	card := s.Turn.CurrentPlayer.Hand.RemoveCard(cityName)
 	s.Decks.PDiscard.AddCard(card)
@@ -199,7 +212,7 @@ func (s *State) OutbreakAction(target string) {
 	s.OutbreakCities = append(s.OutbreakCities, city)
 }
 
-func (s State) HasWon() bool {
+func (s State) HasWon() {
 	// TODO check # virus
 	if s.Viruses.AllCured() {
 		panic("HAS WON")
@@ -214,6 +227,27 @@ func (s State) HasWon() bool {
 	if s.OutbreakCount > 8 {
 		panic("LOST: To many outbreak")
 	}
+}
+
+func (s *State) Save() {
+	b, err := json.Marshal(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+	os.WriteFile("./here.json", b, 0666)
+}
+
+func (s *State) Load() error {
+	b, err := os.ReadFile("./here.json")
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(b, s)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *State) BuildAction(target string) {
@@ -313,7 +347,7 @@ func (s *State) GetActions() PlayersActions {
 				case CityCardType:
 					out[player.Name][FlyToAction] = append(out[player.Name][FlyToAction], card.City.Name)
 					if card.City.Name == player.Location {
-						out[player.Name][FlyAnywhereAction] = []string{player.Location}
+						out[player.Name][FlyAnywhereAction] = []string{"anywhere"}
 
 						if !playerCity.Buildings[ResearchBuilding] {
 							out[player.Name][BuildAction] = []string{player.Location + ":" + string(ResearchBuilding)}

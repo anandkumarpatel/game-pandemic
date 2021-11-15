@@ -148,11 +148,11 @@ const (
 	NextPlayerStep Step = "NextPlayerStep"
 )
 
-func main() {
-	const epidemicCount = 5
-	const playerCount = 2
-	const startLocation = "a"
+const epidemicCount = 5
+const playerCount = 2
+const startLocation = "a"
 
+func createState() *State {
 	cities := genCities()
 	decks := genDecks(cities, epidemicCount)
 
@@ -173,21 +173,30 @@ func main() {
 		Cities:         cities,
 		Viruses:        viruses,
 		Decks:          decks,
-		InfectionLevel: 3,
+		InfectionLevel: 2,
 		OutbreakCount:  0,
 		Turn: &Turn{
+			FirstPlayer:   firstPlayer,
 			CurrentPlayer: players[firstPlayer],
 			ActionCount:   4,
 			Step:          StartStep,
 			DrawCount:     0,
 		},
 	}
-
 	state.SetupVirus()
+
+	return &state
+}
+func main() {
+	state := State{}
+	err := state.Load()
+	if err != nil {
+		state = *createState()
+	}
 
 	for {
 		state.HasWon()
-
+		state.Save()
 		fmt.Printf("start step %s\n", state.Turn.Step)
 		switch state.Turn.Step {
 		case StartStep:
@@ -217,8 +226,8 @@ func main() {
 				continue
 			}
 		case NextPlayerStep:
-			firstPlayer = (firstPlayer + 1) % playerCount
-			state.Turn.CurrentPlayer = players[firstPlayer]
+			state.Turn.FirstPlayer = (state.Turn.FirstPlayer + 1) % playerCount
+			state.Turn.CurrentPlayer = state.Players[state.Turn.FirstPlayer]
 			state.Turn.Step = StartStep
 			continue
 		default:
