@@ -276,7 +276,9 @@ func (s *State) GetActions() PlayersActions {
 					out[player.Name][FlyToAction] = append(out[player.Name][FlyToAction], card.City.Name)
 					if card.City.Name == player.Location {
 						out[player.Name][FlyAnywhereAction] = []string{player.Location}
-						out[player.Name][BuildAction] = []string{player.Location + ":" + string(ResearchBuilding)}
+						if !playerCity.Buildings[ResearchBuilding] {
+							out[player.Name][BuildAction] = []string{player.Location + ":" + string(ResearchBuilding)}
+						}
 					}
 
 				}
