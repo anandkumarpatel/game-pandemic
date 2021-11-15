@@ -158,7 +158,6 @@ func createState() *State {
 	players := genPlayers(playerCount, startLocation, decks.PDeck)
 
 	setupPlayerDeck(decks.PDeck, epidemicCount)
-	firstPlayer := rand.Int() % playerCount
 
 	viruses := Viruses{
 		Black:  NoneVirusStatus,
@@ -175,8 +174,7 @@ func createState() *State {
 		InfectionLevel: 2,
 		OutbreakCount:  0,
 		Turn: &Turn{
-			FirstPlayer:   firstPlayer,
-			CurrentPlayer: players[firstPlayer],
+			CurrentPlayer: rand.Int() % playerCount,
 			ActionCount:   4,
 			Step:          StartStep,
 			DrawCount:     0,
@@ -214,7 +212,7 @@ func main() {
 				continue
 			}
 		case DiscardStep:
-			if state.Turn.CurrentPlayer.Hand.Count() < 8 {
+			if state.CurrentPlayer().Hand.Count() < 8 {
 				state.Turn.InfectCount = state.InfectionLevel
 				state.Turn.Step = InfectionStep
 				continue
@@ -225,8 +223,7 @@ func main() {
 				continue
 			}
 		case NextPlayerStep:
-			state.Turn.FirstPlayer = (state.Turn.FirstPlayer + 1) % playerCount
-			state.Turn.CurrentPlayer = state.Players[state.Turn.FirstPlayer]
+			state.Turn.CurrentPlayer = (state.Turn.CurrentPlayer + 1) % playerCount
 			state.Turn.Step = StartStep
 			continue
 		default:
