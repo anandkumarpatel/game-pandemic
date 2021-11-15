@@ -8,37 +8,37 @@ import (
 	"strings"
 )
 
-type Turn struct {
-	CurrentPlayer int
-	ActionCount   int
-	Step          Step
-	DrawCount     int
-	InfectCount   int
-}
-
 type State struct {
 	Players        Players
 	Cities         Cities
 	Viruses        Viruses
 	Decks          Decks
 	InfectionLevel int
-	Turn           *Turn
 	OutbreakCount  int
 	OutbreakCities Cities
+	CurrentPlayerN int
+	ActionCount    int
+	Step           Step
+	DrawCount      int
+	InfectCount    int
 }
 
 func (s State) String() string {
 	out := ""
-	for i, p := range s.Players {
-		out += fmt.Sprintf("Player(%d) %s\n", i, p)
-	}
 	out += fmt.Sprintf("Cities %s\n", s.Cities)
 	out += fmt.Sprintf("Viruses %v\n", s.Viruses)
 	out += fmt.Sprintf("PDeck %s\n", s.Decks.PDeck)
 	out += fmt.Sprintf("VDeck %s\n", s.Decks.VDeck)
 	out += fmt.Sprintf("PDiscard %s\n", s.Decks.PDiscard)
 	out += fmt.Sprintf("VDiscard %s\n", s.Decks.VDiscard)
-	out += fmt.Sprintf("Current Player %+v\n", s.Turn)
+	out += fmt.Sprintf("InfectCount %d ", s.InfectCount)
+	out += fmt.Sprintf("InfectionLevel %d ", s.InfectionLevel)
+	out += fmt.Sprintf("ActionCount %d ", s.ActionCount)
+	out += fmt.Sprintf("DrawCount %d ", s.DrawCount)
+	out += fmt.Sprintf("OutbreakCount %d\n", s.OutbreakCount)
+	for i, p := range s.Players {
+		out += fmt.Sprintf("Player(%d) %s\n", i, p)
+	}
 
 	return out
 }
@@ -110,7 +110,7 @@ func (s *State) SetupVirus() {
 }
 
 func (s State) CurrentPlayer() *Player {
-	return s.Players[s.Turn.CurrentPlayer]
+	return s.Players[s.CurrentPlayerN]
 }
 
 func (s *State) ResearchAction(target string) {
@@ -127,12 +127,12 @@ func (s *State) ResearchAction(target string) {
 	if s.Cities.IsEradicated(v) {
 		s.Viruses[v] = EradicatedVirusStatus
 	}
-	s.Turn.ActionCount--
+	s.ActionCount--
 }
 
 func (s *State) MoveAction(cityName string) {
 	s.CurrentPlayer().Move(cityName)
-	s.Turn.ActionCount--
+	s.ActionCount--
 }
 
 func (s *State) GiveCardAction(target string) {
@@ -141,7 +141,7 @@ func (s *State) GiveCardAction(target string) {
 	card := s.CurrentPlayer().Hand.RemoveCard(cardName)
 	toPlayer := s.Players.FindByName(playerName)
 	toPlayer.Hand.AddCard(card)
-	s.Turn.ActionCount--
+	s.ActionCount--
 }
 
 func (s *State) GetCardAction(target string) {
@@ -150,7 +150,7 @@ func (s *State) GetCardAction(target string) {
 	fromPlayer := s.Players.FindByName(playerName)
 	card := fromPlayer.Hand.RemoveCard(cardName)
 	s.CurrentPlayer().Hand.AddCard(card)
-	s.Turn.ActionCount--
+	s.ActionCount--
 }
 
 func (s *State) EpidemicAction() {
@@ -173,14 +173,14 @@ func (s *State) FlyAnywhereAction(cityName string) {
 	card := s.CurrentPlayer().Hand.RemoveCard(s.CurrentPlayer().Location)
 	s.Decks.PDiscard.AddCard(card)
 	s.CurrentPlayer().Move(cityName)
-	s.Turn.ActionCount--
+	s.ActionCount--
 }
 
 func (s *State) FlyToAction(cityName string) {
 	card := s.CurrentPlayer().Hand.RemoveCard(cityName)
 	s.Decks.PDiscard.AddCard(card)
 	s.CurrentPlayer().Move(cityName)
-	s.Turn.ActionCount--
+	s.ActionCount--
 }
 
 func (s *State) DiscardAction(cityName string) {
@@ -198,7 +198,7 @@ func (s *State) CureAction(target string) {
 	if s.Cities.IsEradicated(v) {
 		s.Viruses[v] = EradicatedVirusStatus
 	}
-	s.Turn.ActionCount--
+	s.ActionCount--
 }
 
 func (s *State) OutbreakAction(target string) {
@@ -260,13 +260,13 @@ func (s *State) BuildAction(target string) {
 	card := s.CurrentPlayer().Hand.RemoveCard(cityName)
 	s.Decks.PDiscard.AddCard(card)
 	s.Cities.FindByName(cityName).Buildings[Building(buildName)] = true
-	s.Turn.ActionCount--
+	s.ActionCount--
 }
 
 func (s *State) DrawPAction() {
 	card := s.Decks.PDeck.Draw()
 	s.CurrentPlayer().Hand.AddCard(card)
-	s.Turn.DrawCount--
+	s.DrawCount--
 }
 
 func (s *State) InfectAction(count int) {
@@ -276,7 +276,7 @@ func (s *State) InfectAction(count int) {
 		city.VirusCounts[city.VirusType] += count
 	}
 	s.Decks.VDiscard.AddCard(card)
-	s.Turn.InfectCount--
+	s.InfectCount--
 }
 
 type ActionMap map[Action]([]string)
@@ -301,21 +301,21 @@ func (s *State) GetActions() PlayersActions {
 	}
 
 	if !hasEpidemic && !hasOutbreak {
-		if s.Turn.Step == InfectionStep {
+		if s.Step == InfectionStep {
 			out[s.CurrentPlayer().Name][InfectAction] = []string{"draw"}
 		}
 
-		if s.Turn.Step == DrawStep {
+		if s.Step == DrawStep {
 			out[s.CurrentPlayer().Name][DrawPAction] = []string{"draw"}
 		}
 
-		if s.Turn.Step == DiscardStep {
+		if s.Step == DiscardStep {
 			out[s.CurrentPlayer().Name][DiscardAction] = s.CurrentPlayer().Hand.CardNames()
 		}
 	}
 
 	for _, player := range s.Players {
-		if player.Name == s.CurrentPlayer().Name && s.Turn.Step == ActionStep && !hasOutbreak && !hasEpidemic {
+		if player.Name == s.CurrentPlayer().Name && s.Step == ActionStep && !hasOutbreak && !hasEpidemic {
 			playerCity := s.Cities.FindByName(player.Location)
 			if playerCity.Buildings[ResearchBuilding] {
 				groups := player.Hand.HasN(5)

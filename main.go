@@ -173,12 +173,10 @@ func createState() *State {
 		Decks:          decks,
 		InfectionLevel: 2,
 		OutbreakCount:  0,
-		Turn: &Turn{
-			CurrentPlayer: rand.Int() % playerCount,
-			ActionCount:   4,
-			Step:          StartStep,
-			DrawCount:     0,
-		},
+		CurrentPlayerN: rand.Int() % playerCount,
+		ActionCount:    4,
+		Step:           StartStep,
+		DrawCount:      0,
 	}
 	state.SetupVirus()
 
@@ -192,48 +190,49 @@ func main() {
 	}
 
 	for {
-		state.HasWon()
-		state.Save()
-		fmt.Printf("start step %s\n", state.Turn.Step)
-		switch state.Turn.Step {
+		fmt.Printf("start step %s\n", state.Step)
+		switch state.Step {
 		case StartStep:
-			state.Turn.ActionCount = 4
-			state.Turn.Step = ActionStep
+			state.ActionCount = 4
+			state.Step = ActionStep
 			continue
 		case ActionStep:
-			if state.Turn.ActionCount < 1 {
-				state.Turn.DrawCount = 2
-				state.Turn.Step = DrawStep
+			if state.ActionCount < 1 {
+				state.DrawCount = 2
+				state.Step = DrawStep
 				continue
 			}
 		case DrawStep:
-			if state.Turn.DrawCount < 1 {
-				state.Turn.Step = DiscardStep
+			if state.DrawCount < 1 {
+				state.Step = DiscardStep
 				continue
 			}
 		case DiscardStep:
 			if state.CurrentPlayer().Hand.Count() < 8 {
-				state.Turn.InfectCount = state.InfectionLevel
-				state.Turn.Step = InfectionStep
+				state.InfectCount = state.InfectionLevel
+				state.Step = InfectionStep
 				continue
 			}
 		case InfectionStep:
-			if state.Turn.InfectCount < 1 {
-				state.Turn.Step = NextPlayerStep
+			if state.InfectCount < 1 {
+				state.Step = NextPlayerStep
 				continue
 			}
 		case NextPlayerStep:
-			state.Turn.CurrentPlayer = (state.Turn.CurrentPlayer + 1) % playerCount
-			state.Turn.Step = StartStep
+			state.CurrentPlayerN = (state.CurrentPlayerN + 1) % playerCount
+			state.Step = StartStep
 			continue
 		default:
-			panic(fmt.Errorf("invalid action: %s", state.Turn.Step))
+			panic(fmt.Errorf("invalid action: %s", state.Step))
 		}
 
 		fmt.Println(state)
 		fmt.Println()
 
 		doInput(&state)
+
+		state.HasWon()
+		state.Save()
 	}
 }
 
@@ -270,7 +269,7 @@ func doInput(state *State) {
 
 	sort.Sort(&do)
 	fmt.Println(do)
-	fmt.Printf("Enter Option: \n\n")
+	fmt.Printf("Enter Option: ")
 	for {
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
