@@ -14,9 +14,9 @@ const (
 
 type City struct {
 	Name        string
-	VirusCounts VirusCounts
 	Buildings   Buildings
 	Links       []string
+	VirusCounts VirusCounts
 	VirusType   VirusType
 }
 
