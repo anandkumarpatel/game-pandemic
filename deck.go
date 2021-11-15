@@ -22,6 +22,15 @@ func (s Deck) CardNames() []string {
 	return out
 }
 
+func (s Deck) HasEpidemic() bool {
+	for _, card := range s.Cards {
+		if card.Type == PandemicCardType {
+			return true
+		}
+	}
+	return false
+}
+
 func (s Deck) Count() int {
 	return len(s.Cards)
 }
@@ -31,7 +40,7 @@ func (s *Deck) AddCard(card *Card) {
 }
 
 func (s *Deck) AddDeck(deck *Deck) {
-	s.Cards = append(s.Cards, deck.Cards...)
+	s.Cards = append(deck.Cards, s.Cards...)
 }
 
 func (s *Deck) HasN(n int) map[VirusType]*Deck {
@@ -57,6 +66,12 @@ func (s *Deck) HasN(n int) map[VirusType]*Deck {
 
 func (s *Deck) Draw() *Card {
 	out := s.Cards[0]
+	s.RemoveCard(out.Name)
+	return out
+}
+
+func (s *Deck) BackDraw() *Card {
+	out := s.Cards[s.Count()-1]
 	s.RemoveCard(out.Name)
 	return out
 }

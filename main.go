@@ -78,7 +78,7 @@ func genCities() Cities {
 				Blue:   0,
 				Red:    0,
 				Yellow: 0,
-				Black:  3,
+				Black:  0,
 			},
 			Buildings: Buildings{
 				ResearchBuilding: false,
@@ -93,7 +93,8 @@ func genCities() Cities {
 	}
 
 	cities[0].Buildings[ResearchBuilding] = true
-	cities[0].VirusCounts[Black] = 4
+	// cities[0].VirusCounts[Black] = 4
+	// cities[1].VirusCounts[Black] = 3
 	return cities
 }
 

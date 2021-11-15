@@ -54,6 +54,7 @@ const (
 	DrawPAction       Action = "drawP"
 	ResearchAction    Action = "reseach"
 	OutbreakAction    Action = "outbreak"
+	EpidemicAction    Action = "epidemic"
 )
 
 func (a Action) String() string {
@@ -80,6 +81,8 @@ func (s *State) Do(action string, target string) error {
 		s.ResearchAction(target)
 	case OutbreakAction:
 		s.OutbreakAction(target)
+	case EpidemicAction:
+		s.EpidemicAction()
 	default:
 		return fmt.Errorf("invalid action: %s", action)
 	}
@@ -115,6 +118,21 @@ func (s *State) ResearchAction(target string) {
 func (s *State) MoveAction(cityName string) {
 	s.Turn.CurrentPlayer.Move(cityName)
 	s.Turn.ActionCount--
+}
+
+func (s *State) EpidemicAction() {
+	s.InfectionLevel++
+	s.Turn.CurrentPlayer.Hand.RemoveCard("epidemic")
+
+	card := s.Decks.VDeck.BackDraw()
+	if s.Viruses[card.City.VirusType] != EradicatedVirusStatus {
+		card.City.VirusCounts[card.City.VirusType] += 3
+	}
+	s.Decks.VDiscard.AddCard(card)
+	s.Decks.VDiscard.Shuffle()
+
+	s.Decks.VDeck.AddDeck(s.Decks.VDiscard)
+	s.Decks.VDiscard.Clear()
 }
 
 func (s *State) FlyToAction(cityName string) {
@@ -204,20 +222,27 @@ func (s *State) GetActions() PlayersActions {
 		s.OutbreakCities = Cities{}
 	}
 
-	if s.Turn.Step == InfectionStep {
-		out[s.Turn.CurrentPlayer.Name][InfectAction] = []string{"draw"}
+	hasEpidemic := s.Turn.CurrentPlayer.Hand.HasEpidemic()
+	if hasEpidemic {
+		out[s.Turn.CurrentPlayer.Name][EpidemicAction] = []string{"epidemic"}
 	}
 
-	if s.Turn.Step == DrawStep {
-		out[s.Turn.CurrentPlayer.Name][DrawPAction] = []string{"draw"}
-	}
+	if !hasEpidemic && !hasOutbreak {
+		if s.Turn.Step == InfectionStep {
+			out[s.Turn.CurrentPlayer.Name][InfectAction] = []string{"draw"}
+		}
 
-	if s.Turn.Step == DiscardStep {
-		out[s.Turn.CurrentPlayer.Name][DiscardAction] = s.Turn.CurrentPlayer.Hand.CardNames()
+		if s.Turn.Step == DrawStep {
+			out[s.Turn.CurrentPlayer.Name][DrawPAction] = []string{"draw"}
+		}
+
+		if s.Turn.Step == DiscardStep {
+			out[s.Turn.CurrentPlayer.Name][DiscardAction] = s.Turn.CurrentPlayer.Hand.CardNames()
+		}
 	}
 
 	for _, player := range s.Players {
-		if player.Name == s.Turn.CurrentPlayer.Name && s.Turn.Step == ActionStep && !hasOutbreak {
+		if player.Name == s.Turn.CurrentPlayer.Name && s.Turn.Step == ActionStep && !hasOutbreak && !hasEpidemic {
 			playerCity := s.Cities.FindCityByName(player.Location)
 			if playerCity.Buildings[ResearchBuilding] {
 				groups := player.Hand.HasN(3)
