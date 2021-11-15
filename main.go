@@ -88,13 +88,11 @@ func genCities() Cities {
 	}
 
 	for _, cityDef := range cityMap {
-		city := cities.FindCityByName(cityDef.Name)
+		city := cities.FindByName(cityDef.Name)
 		city.Links = append(city.Links, cityDef.Links...)
 	}
 
 	cities[0].Buildings[ResearchBuilding] = true
-	// cities[0].VirusCounts[Black] = 4
-	// cities[1].VirusCounts[Black] = 3
 	return cities
 }
 
@@ -123,8 +121,8 @@ func genDecks(cities Cities, epidemicCount int) Decks {
 	return decks
 }
 
-func genPlayers(playerCount int, startLocation string, pDeck *Deck) []*Player {
-	players := []*Player{}
+func genPlayers(playerCount int, startLocation string, pDeck *Deck) Players {
+	players := Players{}
 
 	for i := 0; i < playerCount; i++ {
 		player := &Player{
@@ -187,6 +185,8 @@ func main() {
 
 	state.SetupVirus()
 
+	card := state.Decks.PDeck.RemoveCard("a")
+	state.Turn.CurrentPlayer.Hand.AddCard(card)
 	for {
 		if state.HasWon() {
 			panic("HAS WON")

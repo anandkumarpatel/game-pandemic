@@ -67,14 +67,14 @@ func (s City) GetOutbreak() VirusType {
 	panic("GetOutbreak: Could not find outbreak")
 }
 
-func (s Cities) FindCityByName(name string) *City {
+func (s Cities) FindByName(name string) *City {
 	for _, city := range s {
 		if city.Name == name {
 			return city
 		}
 	}
 
-	panic(fmt.Errorf("FindCityByName: cant find city %s", name))
+	panic(fmt.Errorf("FindByName: cant find city %s", name))
 }
 
 func (s Cities) Contains(name string) bool {
