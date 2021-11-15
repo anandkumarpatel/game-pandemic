@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Decks struct {
@@ -125,7 +127,7 @@ func genPlayers(playerCount int, startLocation string, pDeck *Deck) Players {
 
 	for i := 0; i < playerCount; i++ {
 		player := &Player{
-			Name:     fmt.Sprint(i),
+			Name:     fmt.Sprint("P", i),
 			Location: startLocation,
 		}
 		players = append(players, player)
@@ -188,6 +190,15 @@ func main() {
 	if err != nil {
 		state = createState()
 	}
+
+	r := gin.Default()
+	r.GET("/state", func(c *gin.Context) {
+		c.JSON(200, state)
+	})
+	r.GET("/actions", func(c *gin.Context) {
+		c.JSON(200, state.GetActions())
+	})
+	go r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 
 	for {
 		fmt.Printf("start step %s\n", state.Step)
