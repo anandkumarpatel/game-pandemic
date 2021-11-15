@@ -98,6 +98,8 @@ func (s *State) Do(action string, target string) error {
 		return fmt.Errorf("invalid action: %s", action)
 	}
 
+	s.Update()
+
 	return nil
 }
 
@@ -384,4 +386,41 @@ func (s *State) GetActions() PlayersActions {
 		}
 	}
 	return out
+}
+
+func (s *State) Update() {
+	if s.Step == StartStep {
+		s.ActionCount = 4
+		s.Step = ActionStep
+	}
+	if s.Step == ActionStep {
+		if s.ActionCount < 1 {
+			s.DrawCount = 2
+			s.Step = DrawStep
+		}
+	}
+	if s.Step == DrawStep {
+		if s.DrawCount < 1 {
+			s.Step = DiscardStep
+		}
+	}
+	if s.Step == DiscardStep {
+		if s.CurrentPlayer().Hand.Count() < 8 {
+			s.InfectCount = s.InfectionLevel
+			s.Step = InfectionStep
+		}
+	}
+	if s.Step == InfectionStep {
+		if s.InfectCount < 1 {
+			s.Step = NextPlayerStep
+		}
+	}
+	if s.Step == NextPlayerStep {
+		s.CurrentPlayerN = (s.CurrentPlayerN + 1) % playerCount
+		s.Step = StartStep
+		s.Update()
+	}
+
+	s.HasWon()
+	s.Save()
 }

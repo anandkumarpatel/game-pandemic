@@ -39,36 +39,62 @@ func setupPlayerDeck(deck *Deck, epidemicCount int) {
 func genCities() Cities {
 	type cityDef struct {
 		Name  string
+		Virus VirusType
 		Links []string
 	}
 
 	var cityMap = []cityDef{
-		{"a", []string{"b", "z"}},
-		{"b", []string{"a", "c"}},
-		{"c", []string{"b", "d"}},
-		{"d", []string{"c", "e"}},
-		{"e", []string{"d", "f"}},
-		{"f", []string{"e", "g"}},
-		{"g", []string{"f", "h"}},
-		{"h", []string{"g", "i"}},
-		{"i", []string{"h", "j"}},
-		{"j", []string{"i", "k"}},
-		{"k", []string{"j", "l"}},
-		{"l", []string{"k", "m"}},
-		{"m", []string{"l", "n"}},
-		{"n", []string{"m", "o"}},
-		{"o", []string{"n", "p"}},
-		{"p", []string{"o", "q"}},
-		{"q", []string{"p", "r"}},
-		{"r", []string{"q", "s"}},
-		{"s", []string{"r", "t"}},
-		{"t", []string{"s", "u"}},
-		{"u", []string{"t", "v"}},
-		{"v", []string{"u", "w"}},
-		{"w", []string{"v", "x"}},
-		{"x", []string{"w", "y"}},
-		{"y", []string{"x", "z"}},
-		{"z", []string{"y", "a"}},
+		{"San_Francisco", Blue, []string{"Tokyo", "Manila", "Los_Angeles", "Chicago"}},
+		{"Chicago", Blue, []string{"San_Francisco", "Toronto", "Atlanta", "Mexico_City"}},
+		{"Atlanta", Blue, []string{"Chicago", "Washington", "Miami"}},
+		{"Toronto", Blue, []string{"Chicago", "Washington", "New_York"}},
+		{"Washington", Blue, []string{"Atlanta", "Miami", "Toronto", "New_York"}},
+		{"New_York", Blue, []string{"Washington", "Madrid", "Toronto", "London"}},
+		{"London", Blue, []string{"New_York", "Paris", "Madrid"}},
+		{"Paris", Blue, []string{"London", "Madrid", "Essen", "Milan", "Algiers"}},
+		{"Madrid", Blue, []string{"New_York", "San_Paulo", "Paris", "Algiers"}},
+		{"Essen", Blue, []string{"London", "Paris", "Milan", "St_Petersburg"}},
+		{"St_Petersburg", Blue, []string{"Essen", "Istanbul", "Moscow"}},
+		{"Milan", Blue, []string{"Essen", "Paris", "Istanbul"}},
+
+		{"Los_Angeles", Yellow, []string{"San_Francisco", "Mexico_City", "Sydney"}},
+		{"Mexico_City", Yellow, []string{"Los_Angeles", "Chicago", "Miami", "Bogota", "Lima"}},
+		{"Miami", Yellow, []string{"Mexico_City", "Atlanta", "Washington", "Bogota"}},
+		{"Lima", Yellow, []string{"Mexico_City", "Santiago", "Bogota"}},
+		{"Santiago", Yellow, []string{"Lima"}},
+		{"Bogota", Yellow, []string{"Lima", "Miami", "Mexico_City", "San_Paulo", "Buenos_Aires"}},
+		{"San_Paulo", Yellow, []string{"Bogota", "Buenos_Aires", "Lagos", "Madrid"}},
+		{"Buenos_Aires", Yellow, []string{"Bogota", "San_Paulo"}},
+		{"Lagos", Yellow, []string{"San_Paulo", "Kinshasa", "Khartoum"}},
+		{"Kinshasa", Yellow, []string{"Johannesburg", "Lagos", "Khartoum"}},
+		{"Khartoum", Yellow, []string{"Johannesburg", "Lagos", "Kinshasa", "Cairo"}},
+		{"Johannesburg", Yellow, []string{"Khartoum", "Kinshasa"}},
+
+		{"Cairo", Black, []string{"Khartoum", "Algiers", "Istanbul", "Baghdad", "Riyadh"}},
+		{"Algiers", Black, []string{"Cairo", "Istanbul", "Paris", "Madrid"}},
+		{"Istanbul", Black, []string{"Algiers", "Milan", "St_Petersburg", "Moscow", "Baghdad", "Cairo"}},
+		{"Moscow", Black, []string{"Istanbul", "St_Petersburg", "Tehran"}},
+		{"Baghdad", Black, []string{"Cairo", "Istanbul", "Tehran", "Riyadh", "Karachi"}},
+		{"Riyadh", Black, []string{"Baghdad", "Cairo", "Karachi"}},
+		{"Tehran", Black, []string{"Moscow", "Baghdad", "Karachi", "Delhi"}},
+		{"Karachi", Black, []string{"Baghdad", "Riyadh", "Tehran", "Delhi", "Mumbai"}},
+		{"Delhi", Black, []string{"Karachi", "Tehran", "Kolkata", "Chennai", "Mumbai"}},
+		{"Mumbai", Black, []string{"Karachi", "Delhi", "Chennai"}},
+		{"Kolkata", Black, []string{"Delhi", "Bangkok", "Hong_Kong", "Chennai"}},
+		{"Chennai", Black, []string{"Delhi", "Bangkok", "Mumbai", "Kolkata", "Jakarta"}},
+
+		{"Bangkok", Red, []string{"Chennai", "Kolkata", "Hong_Kong", "Ho_Chi_Minh_City", "Jakarta"}},
+		{"Hong_Kong", Red, []string{"Bangkok", "Kolkata", "Shanghai", "Ho_Chi_Minh_City", "Manila", "Taipei"}},
+		{"Shanghai", Red, []string{"Hong_Kong", "Taipei", "Tokyo", "Seoul", "Beijing"}},
+		{"Seoul", Red, []string{"Shanghai", "Beijing", "Tokyo"}},
+		{"Beijing", Red, []string{"Seoul", "Shanghai"}},
+		{"Tokyo", Red, []string{"Seoul", "Shanghai", "Osaka", "San_Francisco"}},
+		{"Osaka", Red, []string{"Tokyo", "Taipei"}},
+		{"Taipei", Red, []string{"Osaka", "Shanghai", "Hong_Kong", "Manila"}},
+		{"Manila", Red, []string{"Taipei", "Hong_Kong", "Ho_Chi_Minh_City", "Sydney", "San_Francisco"}},
+		{"Ho_Chi_Minh_City", Red, []string{"Manila", "Hong_Kong", "Bangkok", "Jakarta"}},
+		{"Jakarta", Red, []string{"Ho_Chi_Minh_City", "Chennai", "Bangkok", "Sydney"}},
+		{"Sydney", Red, []string{"Jakarta", "Manila", "Los_Angeles"}},
 	}
 
 	cities := Cities{}
@@ -85,7 +111,7 @@ func genCities() Cities {
 			Buildings: Buildings{
 				ResearchBuilding: false,
 			},
-			VirusType: Black,
+			VirusType: cityDef.Virus,
 		})
 	}
 
@@ -149,9 +175,9 @@ const (
 	NextPlayerStep Step = "NextPlayerStep"
 )
 
-const epidemicCount = 5
+const epidemicCount = 1
 const playerCount = 2
-const startLocation = "a"
+const startLocation = "Atlanta"
 
 func createState() *State {
 	cities := genCities()
@@ -220,53 +246,10 @@ func main() {
 		}
 		c.JSON(200, "OK")
 	})
-
+	state.Update()
 	go r.Run()
-
 	for {
-		fmt.Printf("start step %s\n", state.Step)
-		switch state.Step {
-		case StartStep:
-			state.ActionCount = 4
-			state.Step = ActionStep
-			continue
-		case ActionStep:
-			if state.ActionCount < 1 {
-				state.DrawCount = 2
-				state.Step = DrawStep
-				continue
-			}
-		case DrawStep:
-			if state.DrawCount < 1 {
-				state.Step = DiscardStep
-				continue
-			}
-		case DiscardStep:
-			if state.CurrentPlayer().Hand.Count() < 8 {
-				state.InfectCount = state.InfectionLevel
-				state.Step = InfectionStep
-				continue
-			}
-		case InfectionStep:
-			if state.InfectCount < 1 {
-				state.Step = NextPlayerStep
-				continue
-			}
-		case NextPlayerStep:
-			state.CurrentPlayerN = (state.CurrentPlayerN + 1) % playerCount
-			state.Step = StartStep
-			continue
-		default:
-			panic(fmt.Errorf("invalid action: %s", state.Step))
-		}
-
-		fmt.Println(state)
-		fmt.Println()
-
 		doInput(state)
-
-		state.HasWon()
-		state.Save()
 	}
 }
 
@@ -291,6 +274,9 @@ func (s *DoMap) Less(i, j int) bool {
 }
 
 func doInput(state *State) {
+	fmt.Println(state)
+	fmt.Println()
+
 	actions := state.GetActions()
 	do := DoMap{}
 	for player, actions := range actions {
