@@ -108,7 +108,6 @@ func genDecks(cities Cities, epidemicCount int) Decks {
 		card := &Card{
 			Type:      CityCardType,
 			Name:      city.Name,
-			City:      city,
 			VirusType: Black,
 		}
 

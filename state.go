@@ -155,8 +155,9 @@ func (s *State) EpidemicAction() {
 	s.Turn.CurrentPlayer.Hand.RemoveCard("epidemic")
 
 	card := s.Decks.VDeck.BackDraw()
-	if s.Viruses[card.City.VirusType] != EradicatedVirusStatus {
-		card.City.VirusCounts[card.City.VirusType] += 3
+	city := s.Cities.FindByName(card.Name)
+	if s.Viruses[city.VirusType] != EradicatedVirusStatus {
+		city.VirusCounts[city.VirusType] += 3
 	}
 	s.Decks.VDiscard.AddCard(card)
 	s.Decks.VDiscard.Shuffle()
@@ -267,8 +268,9 @@ func (s *State) DrawPAction() {
 
 func (s *State) InfectAction(count int) {
 	card := s.Decks.VDeck.Draw()
-	if s.Viruses[card.City.VirusType] != EradicatedVirusStatus {
-		card.City.VirusCounts[card.City.VirusType] += count
+	city := s.Cities.FindByName(card.Name)
+	if s.Viruses[city.VirusType] != EradicatedVirusStatus {
+		city.VirusCounts[city.VirusType] += count
 	}
 	s.Decks.VDiscard.AddCard(card)
 	s.Turn.InfectCount--
@@ -345,8 +347,8 @@ func (s *State) GetActions() PlayersActions {
 			for _, card := range player.Hand.Cards {
 				switch card.Type {
 				case CityCardType:
-					out[player.Name][FlyToAction] = append(out[player.Name][FlyToAction], card.City.Name)
-					if card.City.Name == player.Location {
+					out[player.Name][FlyToAction] = append(out[player.Name][FlyToAction], card.Name)
+					if card.Name == player.Location {
 						out[player.Name][FlyAnywhereAction] = []string{"anywhere"}
 
 						if !playerCity.Buildings[ResearchBuilding] {
@@ -358,9 +360,9 @@ func (s *State) GetActions() PlayersActions {
 								continue
 							}
 							if oPlayer.Location == player.Location {
-								out[player.Name][GiveCardAction] = []string{card.City.Name + ":" + oPlayer.Name}
+								out[player.Name][GiveCardAction] = []string{card.Name + ":" + oPlayer.Name}
 								if oPlayer.Hand.Contains(player.Location) {
-									out[player.Name][GetCardAction] = []string{card.City.Name + ":" + oPlayer.Name}
+									out[player.Name][GetCardAction] = []string{card.Name + ":" + oPlayer.Name}
 								}
 							}
 
