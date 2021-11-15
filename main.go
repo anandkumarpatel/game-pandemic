@@ -183,10 +183,10 @@ func createState() *State {
 	return &state
 }
 func main() {
-	state := State{}
+	state := &State{}
 	err := state.Load()
 	if err != nil {
-		state = *createState()
+		state = createState()
 	}
 
 	for {
@@ -229,7 +229,7 @@ func main() {
 		fmt.Println(state)
 		fmt.Println()
 
-		doInput(&state)
+		doInput(state)
 
 		state.HasWon()
 		state.Save()
