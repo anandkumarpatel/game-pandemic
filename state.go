@@ -56,6 +56,7 @@ const (
 	OutbreakAction    Action = "outbreak"
 	EpidemicAction    Action = "epidemic"
 	GiveCardAction    Action = "GiveCard"
+	GetCardAction     Action = "GetCard"
 )
 
 func (a Action) String() string {
@@ -86,6 +87,8 @@ func (s *State) Do(action string, target string) error {
 		s.EpidemicAction()
 	case GiveCardAction:
 		s.GiveCardAction(target)
+	case GetCardAction:
+		s.GetCardAction(target)
 	default:
 		return fmt.Errorf("invalid action: %s", action)
 	}
@@ -127,8 +130,17 @@ func (s *State) GiveCardAction(target string) {
 	split := strings.Split(target, ":")
 	cardName, playerName := split[0], split[1]
 	card := s.Turn.CurrentPlayer.Hand.RemoveCard(cardName)
-	givePlayer := s.Players.FindByName(playerName)
-	givePlayer.Hand.AddCard(card)
+	toPlayer := s.Players.FindByName(playerName)
+	toPlayer.Hand.AddCard(card)
+	s.Turn.ActionCount--
+}
+
+func (s *State) GetCardAction(target string) {
+	split := strings.Split(target, ":")
+	cardName, playerName := split[0], split[1]
+	fromPlayer := s.Players.FindByName(playerName)
+	card := fromPlayer.Hand.RemoveCard(cardName)
+	s.Turn.CurrentPlayer.Hand.AddCard(card)
 	s.Turn.ActionCount--
 }
 
@@ -189,6 +201,10 @@ func (s *State) OutbreakAction(target string) {
 
 func (s State) HasWon() bool {
 	// TODO check # virus
+	if s.Viruses.AllCured() {
+		panic("HAS WON")
+	}
+
 	if s.Decks.VDeck.Count() < 1 {
 		panic("LOST: No more Virus Cards")
 	}
@@ -198,7 +214,6 @@ func (s State) HasWon() bool {
 	if s.OutbreakCount > 8 {
 		panic("LOST: To many outbreak")
 	}
-	return s.Viruses.AllCured()
 }
 
 func (s *State) BuildAction(target string) {
@@ -282,6 +297,17 @@ func (s *State) GetActions() PlayersActions {
 				out[player.Name][CureAction] = cureing
 			}
 
+			for _, oPlayer := range s.Players {
+				if oPlayer.Name == s.Turn.CurrentPlayer.Name {
+					continue
+				}
+				if oPlayer.Location == player.Location {
+					if oPlayer.Hand.Contains(player.Location) {
+						out[player.Name][GetCardAction] = []string{player.Location + ":" + oPlayer.Name}
+					}
+				}
+			}
+
 			for _, card := range player.Hand.Cards {
 				switch card.Type {
 				case CityCardType:
@@ -299,7 +325,11 @@ func (s *State) GetActions() PlayersActions {
 							}
 							if oPlayer.Location == player.Location {
 								out[player.Name][GiveCardAction] = []string{card.City.Name + ":" + oPlayer.Name}
+								if oPlayer.Hand.Contains(player.Location) {
+									out[player.Name][GetCardAction] = []string{card.City.Name + ":" + oPlayer.Name}
+								}
 							}
+
 						}
 					}
 

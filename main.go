@@ -185,12 +185,9 @@ func main() {
 
 	state.SetupVirus()
 
-	card := state.Decks.PDeck.RemoveCard("a")
-	state.Turn.CurrentPlayer.Hand.AddCard(card)
 	for {
-		if state.HasWon() {
-			panic("HAS WON")
-		}
+		state.HasWon()
+
 		fmt.Printf("start step %s\n", state.Turn.Step)
 		switch state.Turn.Step {
 		case StartStep:
@@ -204,7 +201,6 @@ func main() {
 				continue
 			}
 		case DrawStep:
-			// TODO pandemic card
 			if state.Turn.DrawCount < 1 {
 				state.Turn.Step = DiscardStep
 				continue

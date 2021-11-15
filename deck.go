@@ -22,6 +22,15 @@ func (s Deck) CardNames() []string {
 	return out
 }
 
+func (s Deck) Contains(name string) bool {
+	for _, card := range s.Cards {
+		if card.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
 func (s Deck) HasEpidemic() bool {
 	for _, card := range s.Cards {
 		if card.Type == PandemicCardType {
