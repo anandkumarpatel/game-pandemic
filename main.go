@@ -198,7 +198,30 @@ func main() {
 	r.GET("/actions", func(c *gin.Context) {
 		c.JSON(200, state.GetActions())
 	})
-	go r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r.POST("/action/:action", func(c *gin.Context) {
+		action := c.Param("action")
+		if action == "" {
+			c.JSON(403, "missing action")
+			return
+		}
+		player := c.Query("player")
+		if player == "" {
+			c.JSON(403, "missing player")
+			return
+		}
+		target := c.Query("target")
+		if target == "" {
+			c.JSON(403, "missing target")
+			return
+		}
+		if err := state.Do(action, target); err != nil {
+			c.JSON(500, err)
+			return
+		}
+		c.JSON(200, "OK")
+	})
+
+	go r.Run()
 
 	for {
 		fmt.Printf("start step %s\n", state.Step)
