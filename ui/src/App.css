@@ -12,35 +12,22 @@
   color: white;
 }
 
-.background-black {
+.btn-black {
   background-color: black;
-}
-
-.background-blue {
-  background-color: blue;
-}
-
-.background-yellow {
-  background-color: yellow;
-}
-
-.background-red {
-  background-color: red;
-}
-
-.text-white {
   color: white;
 }
 
-.text-black {
+.btn-blue {
+  background-color: blue;
+  color: white;
+}
+
+.btn-yellow {
+  background-color: yellow;
   color: black;
 }
 
-.card {
-  width: 150px;
-  display: inline-block;
-  padding: 5px;
-  height: 30px;
-  margin-left: 10px;
-  margin-right: 10px;
+.btn-red {
+  background-color: red;
+  color: black;
 }

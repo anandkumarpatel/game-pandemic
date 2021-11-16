@@ -194,7 +194,10 @@ func main() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 	r.GET("/state", func(c *gin.Context) {
-		c.JSON(200, state)
+		c.JSON(200, map[string]interface{}{
+			"State":   state,
+			"Actions": state.GetActions(),
+		})
 	})
 	r.GET("/actions", func(c *gin.Context) {
 		c.JSON(200, state.GetActions())

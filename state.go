@@ -53,7 +53,6 @@ const (
 	BuildAction       Action = "build"
 	DiscardAction     Action = "discard"
 	InfectAction      Action = "infect"
-	NextAction        Action = "next"
 	DrawPAction       Action = "drawP"
 	ResearchAction    Action = "reseach"
 	OutbreakAction    Action = "outbreak"
