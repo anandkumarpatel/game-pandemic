@@ -49,16 +49,18 @@ const (
 	MoveAction        Action = "move"
 	FlyAnywhereAction Action = "flyAnywhere"
 	FlyToAction       Action = "flyTo"
-	CureAction        Action = "cure"
-	BuildAction       Action = "build"
-	DiscardAction     Action = "discard"
-	InfectAction      Action = "infect"
-	DrawAction        Action = "draw"
-	ResearchAction    Action = "research"
-	OutbreakAction    Action = "outbreak"
-	EpidemicAction    Action = "epidemic"
-	GiveCardAction    Action = "give"
-	GetCardAction     Action = "get"
+
+	ShuttleAction  Action = "suttle" //TODO impliment research travel
+	CureAction     Action = "cure"
+	BuildAction    Action = "build"
+	DiscardAction  Action = "discard"
+	InfectAction   Action = "infect"
+	DrawAction     Action = "draw"
+	ResearchAction Action = "research"
+	OutbreakAction Action = "outbreak"
+	EpidemicAction Action = "epidemic"
+	GiveCardAction Action = "give"
+	GetCardAction  Action = "get"
 )
 
 func (a Action) String() string {
