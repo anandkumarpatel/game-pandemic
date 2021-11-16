@@ -1,0 +1,46 @@
+.App {
+  text-align: center;
+}
+
+.Actions {
+  background-color: #282c34;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.background-black {
+  background-color: black;
+}
+
+.background-blue {
+  background-color: blue;
+}
+
+.background-yellow {
+  background-color: yellow;
+}
+
+.background-red {
+  background-color: red;
+}
+
+.text-white {
+  color: white;
+}
+
+.text-black {
+  color: black;
+}
+
+.card {
+  width: 150px;
+  display: inline-block;
+  padding: 5px;
+  height: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
+}

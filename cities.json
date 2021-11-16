@@ -1,0 +1,520 @@
+[
+    {
+        "Name": "Atlanta",
+        "x": 2, "y": 2,
+        "Virus": "Blue",
+        "Links": [
+            "Chicago",
+            "Washington",
+            "Miami"
+        ]
+    },
+    {
+        "Name": "San_Francisco",
+        "x": 0, "y": 1,
+        "Virus": "Blue",
+        "Links": [
+            "Tokyo",
+            "Manila",
+            "Los_Angeles",
+            "Chicago"
+        ]
+    },
+    {
+        "Name": "Chicago",
+        "x": 1, "y": 2,
+        "Virus": "Blue",
+        "Links": [
+            "San_Francisco",
+            "Toronto",
+            "Atlanta",
+            "Mexico_City"
+        ]
+    },
+    {
+        "Name": "Toronto",
+        "x": 2, "y": 1,
+        "Virus": "Blue",
+        "Links": [
+            "Chicago",
+            "Washington",
+            "New_York"
+        ]
+    },
+    {
+        "Name": "Washington",
+        "x": 3, "y": 2,
+        "Virus": "Blue",
+        "Links": [
+            "Atlanta",
+            "Miami",
+            "Toronto",
+            "New_York"
+        ]
+    },
+    {
+        "Name": "New_York",
+        "x": 3, "y": 1,
+        "Virus": "Blue",
+        "Links": [
+            "Washington",
+            "Madrid",
+            "Toronto",
+            "London"
+        ]
+    },
+    {
+        "Name": "London",
+        "x": 4, "y": 0,
+        "Virus": "Blue",
+        "Links": [
+            "New_York",
+            "Paris",
+            "Madrid"
+        ]
+    },
+    {
+        "Name": "Paris",
+        "x": 4, "y": 1,
+        "Virus": "Blue",
+        "Links": [
+            "London",
+            "Madrid",
+            "Essen",
+            "Milan",
+            "Algiers"
+        ]
+    },
+    {
+        "Name": "Madrid",
+        "x": 4, "y": 2,
+        "Virus": "Blue",
+        "Links": [
+            "New_York",
+            "San_Paulo",
+            "Paris",
+            "Algiers"
+        ]
+    },
+    {
+        "Name": "Essen",
+        "x": 5, "y": 0,
+        "Virus": "Blue",
+        "Links": [
+            "London",
+            "Paris",
+            "Milan",
+            "St_Petersburg"
+        ]
+    },
+    {
+        "Name": "St_Petersburg",
+        "x": 6, "y": 0,
+        "Virus": "Blue",
+        "Links": [
+            "Essen",
+            "Istanbul",
+            "Moscow"
+        ]
+    },
+    {
+        "Name": "Milan",
+        "x": 5, "y": 1,
+        "Virus": "Blue",
+        "Links": [
+            "Essen",
+            "Paris",
+            "Istanbul"
+        ]
+    },
+    {
+        "Name": "Los_Angeles",
+        "x": 0, "y": 2,
+        "Virus": "Yellow",
+        "Links": [
+            "San_Francisco",
+            "Mexico_City",
+            "Sydney"
+        ]
+    },
+    {
+        "Name": "Mexico_City",
+        "x": 1, "y": 3,
+        "Virus": "Yellow",
+        "Links": [
+            "Los_Angeles",
+            "Chicago",
+            "Miami",
+            "Bogota",
+            "Lima"
+        ]
+    },
+    {
+        "Name": "Miami",
+        "x": 2, "y": 3,
+        "Virus": "Yellow",
+        "Links": [
+            "Mexico_City",
+            "Atlanta",
+            "Washington",
+            "Bogota"
+        ]
+    },
+    {
+        "Name": "Lima",
+        "x": 1, "y": 4,
+        "Virus": "Yellow",
+        "Links": [
+            "Mexico_City",
+            "Santiago",
+            "Bogota"
+        ]
+    },
+    {
+        "Name": "Santiago",
+        "x": 1, "y": 5,
+        "Virus": "Yellow",
+        "Links": [
+            "Lima"
+        ]
+    },
+    {
+        "Name": "Bogota",
+        "x": 2, "y": 4,
+        "Virus": "Yellow",
+        "Links": [
+            "Lima",
+            "Miami",
+            "Mexico_City",
+            "San_Paulo",
+            "Buenos_Aires"
+        ]
+    },
+    {
+        "Name": "San_Paulo",
+        "x": 3, "y": 3,
+        "Virus": "Yellow",
+        "Links": [
+            "Bogota",
+            "Buenos_Aires",
+            "Lagos",
+            "Madrid"
+        ]
+    },
+    {
+        "Name": "Buenos_Aires",
+        "x": 3, "y": 4,
+        "Virus": "Yellow",
+        "Links": [
+            "Bogota",
+            "San_Paulo"
+        ]
+    },
+    {
+        "Name": "Lagos",
+        "x": 4, "y": 3,
+        "Virus": "Yellow",
+        "Links": [
+            "San_Paulo",
+            "Kinshasa",
+            "Khartoum"
+        ]
+    },
+    {
+        "Name": "Kinshasa",
+        "x": 4, "y": 4,
+        "Virus": "Yellow",
+        "Links": [
+            "Johannesburg",
+            "Lagos",
+            "Khartoum"
+        ]
+    },
+    {
+        "Name": "Khartoum",
+        "x": 5, "y": 3,
+        "Virus": "Yellow",
+        "Links": [
+            "Johannesburg",
+            "Lagos",
+            "Kinshasa",
+            "Cairo"
+        ]
+    },
+    {
+        "Name": "Johannesburg",
+        "x": 5, "y": 4,
+        "Virus": "Yellow",
+        "Links": [
+            "Khartoum",
+            "Kinshasa"
+        ]
+    },
+    {
+        "Name": "Cairo",
+        "x": 6, "y": 2,
+        "Virus": "Black",
+        "Links": [
+            "Khartoum",
+            "Algiers",
+            "Istanbul",
+            "Baghdad",
+            "Riyadh"
+        ]
+    },
+    {
+        "Name": "Algiers",
+        "x": 5, "y": 2,
+        "Virus": "Black",
+        "Links": [
+            "Cairo",
+            "Istanbul",
+            "Paris",
+            "Madrid"
+        ]
+    },
+    {
+        "Name": "Istanbul",
+        "x": 6, "y": 1,
+        "Virus": "Black",
+        "Links": [
+            "Algiers",
+            "Milan",
+            "St_Petersburg",
+            "Moscow",
+            "Baghdad",
+            "Cairo"
+        ]
+    },
+    {
+        "Name": "Moscow",
+        "x": 7, "y": 1,
+        "Virus": "Black",
+        "Links": [
+            "Istanbul",
+            "St_Petersburg",
+            "Tehran"
+        ]
+    },
+    {
+        "Name": "Baghdad",
+        "x": 7, "y": 2,
+        "Virus": "Black",
+        "Links": [
+            "Cairo",
+            "Istanbul",
+            "Tehran",
+            "Riyadh",
+            "Karachi"
+        ]
+    },
+    {
+        "Name": "Riyadh",
+        "x": 7, "y": 3,
+        "Virus": "Black",
+        "Links": [
+            "Baghdad",
+            "Cairo",
+            "Karachi"
+        ]
+    },
+    {
+        "Name": "Tehran",
+        "x": 8, "y": 2,
+        "Virus": "Black",
+        "Links": [
+            "Moscow",
+            "Baghdad",
+            "Karachi",
+            "Delhi"
+        ]
+    },
+    {
+        "Name": "Karachi",
+        "x": 8, "y": 3,
+        "Virus": "Black",
+        "Links": [
+            "Baghdad",
+            "Riyadh",
+            "Tehran",
+            "Delhi",
+            "Mumbai"
+        ]
+    },
+    {
+        "Name": "Delhi",
+        "x": 9, "y": 3,
+        "Virus": "Black",
+        "Links": [
+            "Karachi",
+            "Tehran",
+            "Kolkata",
+            "Chennai",
+            "Mumbai"
+        ]
+    },
+    {
+        "Name": "Mumbai",
+        "x": 9, "y": 4,
+        "Virus": "Black",
+        "Links": [
+            "Karachi",
+            "Delhi",
+            "Chennai"
+        ]
+    },
+    {
+        "Name": "Kolkata",
+        "x": 10, "y": 3,
+        "Virus": "Black",
+        "Links": [
+            "Delhi",
+            "Bangkok",
+            "Hong_Kong",
+            "Chennai"
+        ]
+    },
+    {
+        "Name": "Chennai",
+        "x": 10, "y": 4,
+        "Virus": "Black",
+        "Links": [
+            "Delhi",
+            "Bangkok",
+            "Mumbai",
+            "Kolkata",
+            "Jakarta"
+        ]
+    },
+    {
+        "Name": "Bangkok",
+        "x": 11, "y": 3,
+        "Virus": "Red",
+        "Links": [
+            "Chennai",
+            "Kolkata",
+            "Hong_Kong",
+            "Ho_Chi_Minh_City",
+            "Jakarta"
+        ]
+    },
+    {
+        "Name": "Hong_Kong",
+        "x": 11, "y": 2,
+        "Virus": "Red",
+        "Links": [
+            "Bangkok",
+            "Kolkata",
+            "Shanghai",
+            "Ho_Chi_Minh_City",
+            "Manila",
+            "Taipei"
+        ]
+    },
+    {
+        "Name": "Shanghai",
+        "x": 11, "y": 1,
+        "Virus": "Red",
+        "Links": [
+            "Hong_Kong",
+            "Taipei",
+            "Tokyo",
+            "Seoul",
+            "Beijing"
+        ]
+    },
+    {
+        "Name": "Seoul",
+        "x": 11, "y": 0,
+        "Virus": "Red",
+        "Links": [
+            "Shanghai",
+            "Beijing",
+            "Tokyo"
+        ]
+    },
+    {
+        "Name": "Beijing",
+        "x": 10, "y": 0,
+        "Virus": "Red",
+        "Links": [
+            "Seoul",
+            "Shanghai"
+        ]
+    },
+    {
+        "Name": "Tokyo",
+        "x": 12, "y": 0,
+        "Virus": "Red",
+        "Links": [
+            "Seoul",
+            "Shanghai",
+            "Osaka",
+            "San_Francisco"
+        ]
+    },
+    {
+        "Name": "Osaka",
+        "x": 12, "y": 1,
+        "Virus": "Red",
+        "Links": [
+            "Tokyo",
+            "Taipei"
+        ]
+    },
+    {
+        "Name": "Taipei",
+        "x": 12, "y": 2,
+        "Virus": "Red",
+        "Links": [
+            "Osaka",
+            "Shanghai",
+            "Hong_Kong",
+            "Manila"
+        ]
+    },
+    {
+        "Name": "Manila",
+        "x": 12, "y": 3,
+        "Virus": "Red",
+        "Links": [
+            "Taipei",
+            "Hong_Kong",
+            "Ho_Chi_Minh_City",
+            "Sydney",
+            "San_Francisco"
+        ]
+    },
+    {
+        "Name": "Ho_Chi_Minh_City",
+        "x": 12, "y": 4,
+        "Virus": "Red",
+        "Links": [
+            "Manila",
+            "Hong_Kong",
+            "Bangkok",
+            "Jakarta"
+        ]
+    },
+    {
+        "Name": "Jakarta",
+        "x": 12, "y": 5,
+        "Virus": "Red",
+        "Links": [
+            "Ho_Chi_Minh_City",
+            "Chennai",
+            "Bangkok",
+            "Sydney"
+        ]
+    },
+    {
+        "Name": "Sydney",
+        "x": 13, "y": 3,
+        "Virus": "Red",
+        "Links": [
+            "Jakarta",
+            "Manila",
+            "Los_Angeles"
+        ]
+    }
+]

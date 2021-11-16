@@ -1,0 +1,194 @@
+{
+    "San_Francisco": {
+        "x": 0,
+        "y": 1
+    },
+    "Chicago": {
+        "x": 1,
+        "y": 2
+    },
+    "Atlanta": {
+        "x": 2,
+        "y": 2
+    },
+    "Toronto": {
+        "x": 2,
+        "y": 1
+    },
+    "Washington": {
+        "x": 3,
+        "y": 2
+    },
+    "New_York": {
+        "x": 3,
+        "y": 1
+    },
+    "London": {
+        "x": 4,
+        "y": 0
+    },
+    "Paris": {
+        "x": 4,
+        "y": 1
+    },
+    "Madrid": {
+        "x": 4,
+        "y": 2
+    },
+    "Essen": {
+        "x": 5,
+        "y": 0
+    },
+    "St_Petersburg": {
+        "x": 6,
+        "y": 0
+    },
+    "Milan": {
+        "x": 5,
+        "y": 1
+    },
+    "Los_Angeles": {
+        "x": 0,
+        "y": 2
+    },
+    "Mexico_City": {
+        "x": 1,
+        "y": 3
+    },
+    "Miami": {
+        "x": 2,
+        "y": 3
+    },
+    "Lima": {
+        "x": 1,
+        "y": 4
+    },
+    "Santiago": {
+        "x": 1,
+        "y": 5
+    },
+    "Bogota": {
+        "x": 2,
+        "y": 4
+    },
+    "San_Paulo": {
+        "x": 3,
+        "y": 3
+    },
+    "Buenos_Aires": {
+        "x": 3,
+        "y": 4
+    },
+    "Lagos": {
+        "x": 4,
+        "y": 3
+    },
+    "Kinshasa": {
+        "x": 4,
+        "y": 4
+    },
+    "Khartoum": {
+        "x": 5,
+        "y": 3
+    },
+    "Johannesburg": {
+        "x": 5,
+        "y": 4
+    },
+    "Cairo": {
+        "x": 6,
+        "y": 2
+    },
+    "Algiers": {
+        "x": 5,
+        "y": 2
+    },
+    "Istanbul": {
+        "x": 6,
+        "y": 1
+    },
+    "Moscow": {
+        "x": 7,
+        "y": 1
+    },
+    "Baghdad": {
+        "x": 7,
+        "y": 2
+    },
+    "Riyadh": {
+        "x": 7,
+        "y": 3
+    },
+    "Tehran": {
+        "x": 8,
+        "y": 2
+    },
+    "Karachi": {
+        "x": 8,
+        "y": 3
+    },
+    "Delhi": {
+        "x": 9,
+        "y": 3
+    },
+    "Mumbai": {
+        "x": 9,
+        "y": 4
+    },
+    "Kolkata": {
+        "x": 10,
+        "y": 3
+    },
+    "Chennai": {
+        "x": 10,
+        "y": 4
+    },
+    "Bangkok": {
+        "x": 11,
+        "y": 3
+    },
+    "Hong_Kong": {
+        "x": 11,
+        "y": 2
+    },
+    "Shanghai": {
+        "x": 11,
+        "y": 1
+    },
+    "Seoul": {
+        "x": 11,
+        "y": 0
+    },
+    "Beijing": {
+        "x": 10,
+        "y": 0
+    },
+    "Tokyo": {
+        "x": 12,
+        "y": 0
+    },
+    "Osaka": {
+        "x": 12,
+        "y": 1
+    },
+    "Taipei": {
+        "x": 12,
+        "y": 2
+    },
+    "Manila": {
+        "x": 12,
+        "y": 3
+    },
+    "Ho_Chi_Minh_City": {
+        "x": 12,
+        "y": 4
+    },
+    "Jakarta": {
+        "x": 12,
+        "y": 5
+    },
+    "Sydney": {
+        "x": 13,
+        "y": 3
+    }
+}

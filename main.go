@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"os"
@@ -43,58 +44,14 @@ func genCities() Cities {
 		Links []string
 	}
 
-	var cityMap = []cityDef{
-		{"San_Francisco", Blue, []string{"Tokyo", "Manila", "Los_Angeles", "Chicago"}},
-		{"Chicago", Blue, []string{"San_Francisco", "Toronto", "Atlanta", "Mexico_City"}},
-		{"Atlanta", Blue, []string{"Chicago", "Washington", "Miami"}},
-		{"Toronto", Blue, []string{"Chicago", "Washington", "New_York"}},
-		{"Washington", Blue, []string{"Atlanta", "Miami", "Toronto", "New_York"}},
-		{"New_York", Blue, []string{"Washington", "Madrid", "Toronto", "London"}},
-		{"London", Blue, []string{"New_York", "Paris", "Madrid"}},
-		{"Paris", Blue, []string{"London", "Madrid", "Essen", "Milan", "Algiers"}},
-		{"Madrid", Blue, []string{"New_York", "San_Paulo", "Paris", "Algiers"}},
-		{"Essen", Blue, []string{"London", "Paris", "Milan", "St_Petersburg"}},
-		{"St_Petersburg", Blue, []string{"Essen", "Istanbul", "Moscow"}},
-		{"Milan", Blue, []string{"Essen", "Paris", "Istanbul"}},
-
-		{"Los_Angeles", Yellow, []string{"San_Francisco", "Mexico_City", "Sydney"}},
-		{"Mexico_City", Yellow, []string{"Los_Angeles", "Chicago", "Miami", "Bogota", "Lima"}},
-		{"Miami", Yellow, []string{"Mexico_City", "Atlanta", "Washington", "Bogota"}},
-		{"Lima", Yellow, []string{"Mexico_City", "Santiago", "Bogota"}},
-		{"Santiago", Yellow, []string{"Lima"}},
-		{"Bogota", Yellow, []string{"Lima", "Miami", "Mexico_City", "San_Paulo", "Buenos_Aires"}},
-		{"San_Paulo", Yellow, []string{"Bogota", "Buenos_Aires", "Lagos", "Madrid"}},
-		{"Buenos_Aires", Yellow, []string{"Bogota", "San_Paulo"}},
-		{"Lagos", Yellow, []string{"San_Paulo", "Kinshasa", "Khartoum"}},
-		{"Kinshasa", Yellow, []string{"Johannesburg", "Lagos", "Khartoum"}},
-		{"Khartoum", Yellow, []string{"Johannesburg", "Lagos", "Kinshasa", "Cairo"}},
-		{"Johannesburg", Yellow, []string{"Khartoum", "Kinshasa"}},
-
-		{"Cairo", Black, []string{"Khartoum", "Algiers", "Istanbul", "Baghdad", "Riyadh"}},
-		{"Algiers", Black, []string{"Cairo", "Istanbul", "Paris", "Madrid"}},
-		{"Istanbul", Black, []string{"Algiers", "Milan", "St_Petersburg", "Moscow", "Baghdad", "Cairo"}},
-		{"Moscow", Black, []string{"Istanbul", "St_Petersburg", "Tehran"}},
-		{"Baghdad", Black, []string{"Cairo", "Istanbul", "Tehran", "Riyadh", "Karachi"}},
-		{"Riyadh", Black, []string{"Baghdad", "Cairo", "Karachi"}},
-		{"Tehran", Black, []string{"Moscow", "Baghdad", "Karachi", "Delhi"}},
-		{"Karachi", Black, []string{"Baghdad", "Riyadh", "Tehran", "Delhi", "Mumbai"}},
-		{"Delhi", Black, []string{"Karachi", "Tehran", "Kolkata", "Chennai", "Mumbai"}},
-		{"Mumbai", Black, []string{"Karachi", "Delhi", "Chennai"}},
-		{"Kolkata", Black, []string{"Delhi", "Bangkok", "Hong_Kong", "Chennai"}},
-		{"Chennai", Black, []string{"Delhi", "Bangkok", "Mumbai", "Kolkata", "Jakarta"}},
-
-		{"Bangkok", Red, []string{"Chennai", "Kolkata", "Hong_Kong", "Ho_Chi_Minh_City", "Jakarta"}},
-		{"Hong_Kong", Red, []string{"Bangkok", "Kolkata", "Shanghai", "Ho_Chi_Minh_City", "Manila", "Taipei"}},
-		{"Shanghai", Red, []string{"Hong_Kong", "Taipei", "Tokyo", "Seoul", "Beijing"}},
-		{"Seoul", Red, []string{"Shanghai", "Beijing", "Tokyo"}},
-		{"Beijing", Red, []string{"Seoul", "Shanghai"}},
-		{"Tokyo", Red, []string{"Seoul", "Shanghai", "Osaka", "San_Francisco"}},
-		{"Osaka", Red, []string{"Tokyo", "Taipei"}},
-		{"Taipei", Red, []string{"Osaka", "Shanghai", "Hong_Kong", "Manila"}},
-		{"Manila", Red, []string{"Taipei", "Hong_Kong", "Ho_Chi_Minh_City", "Sydney", "San_Francisco"}},
-		{"Ho_Chi_Minh_City", Red, []string{"Manila", "Hong_Kong", "Bangkok", "Jakarta"}},
-		{"Jakarta", Red, []string{"Ho_Chi_Minh_City", "Chennai", "Bangkok", "Sydney"}},
-		{"Sydney", Red, []string{"Jakarta", "Manila", "Los_Angeles"}},
+	var cityMap = []cityDef{}
+	b, err := os.ReadFile("./cities.json")
+	if err != nil {
+		panic(err)
+	}
+	err = json.Unmarshal(b, &cityMap)
+	if err != nil {
+		panic(err)
 	}
 
 	cities := Cities{}
@@ -136,7 +93,7 @@ func genDecks(cities Cities, epidemicCount int) Decks {
 		card := &Card{
 			Type:      CityCardType,
 			Name:      city.Name,
-			VirusType: Black,
+			VirusType: city.VirusType,
 		}
 
 		decks.VDeck.AddCard(card)
@@ -210,6 +167,23 @@ func createState() *State {
 
 	return &state
 }
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "*")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
+}
+
 func main() {
 	state := &State{}
 	err := state.Load()
@@ -218,6 +192,7 @@ func main() {
 	}
 
 	r := gin.Default()
+	r.Use(CORSMiddleware())
 	r.GET("/state", func(c *gin.Context) {
 		c.JSON(200, state)
 	})
