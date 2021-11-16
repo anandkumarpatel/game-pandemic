@@ -54,7 +54,7 @@ const (
 	DiscardAction     Action = "discard"
 	InfectAction      Action = "infect"
 	DrawAction        Action = "draw"
-	ResearchAction    Action = "reseach"
+	ResearchAction    Action = "research"
 	OutbreakAction    Action = "outbreak"
 	EpidemicAction    Action = "epidemic"
 	GiveCardAction    Action = "give"
@@ -196,6 +196,10 @@ func (s *State) CureAction(target string) {
 
 	city := s.Cities.FindByName(cityName)
 	city.VirusCounts[v]--
+	if s.Viruses[v] == CuredVirusStatus {
+		city.VirusCounts[v] = 0
+	}
+
 	if s.Cities.IsEradicated(v) {
 		s.Viruses[v] = EradicatedVirusStatus
 	}

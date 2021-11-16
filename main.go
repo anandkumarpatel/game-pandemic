@@ -223,7 +223,10 @@ func main() {
 			c.JSON(500, err.Error())
 			return
 		}
-		c.JSON(200, "OK")
+		c.JSON(200, map[string]interface{}{
+			"State":   state,
+			"Actions": state.GetActions(),
+		})
 	})
 	state.Update()
 	go r.Run()

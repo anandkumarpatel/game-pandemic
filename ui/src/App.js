@@ -56,6 +56,7 @@ class App extends React.Component {
     this.getCity = this.getCity.bind(this)
     this.onLoad = this.onLoad.bind(this)
     this.click = this.click.bind(this)
+    this.updateState = this.updateState.bind(this)
   }
 
   click(e) {
@@ -66,6 +67,8 @@ class App extends React.Component {
     return fetch(`${BACKEND}/action/${action}?player=${player.Name}&target=${target}`, {
       method: "POST"
     })
+      .then(res => res.json())
+      .then(res => this.updateState(res))
   }
 
   getCity(name, elements = this.state.elements) {
@@ -83,96 +86,97 @@ class App extends React.Component {
     })
   }
 
-  onLoad(reactFlowInstance) {
+  updateState(input) {
     const elements = []
-    return fetch(`${BACKEND}/state`)
-      .then(res => res.json())
-      .then((input) => {
-
-        const state = input.State
-        state.Cities.forEach((city) => {
-          const cityX = citypos[city.Name].x * 150
-          const cityY = citypos[city.Name].y * 100
+    const state = input.State
+    state.Cities.forEach((city) => {
+      const cityX = citypos[city.Name].x * 150
+      const cityY = citypos[city.Name].y * 100
+      elements.push({
+        id: city.Name,
+        data: { label: city.Name, Virus: city.VirusType },
+        style: {
+          width: "80px",
+          background: city.VirusType,
+          color: textColorMap[city.VirusType],
+        },
+        position: { x: cityX, y: cityY },
+      })
+      city.Links.forEach((link) => {
+        if (!elements.some(c => c.id === `e${link}-${city.Name}`)) {
           elements.push({
-            id: city.Name,
-            data: { label: city.Name, Virus: city.VirusType },
-            style: {
-              width: "80px",
-              background: city.VirusType,
-              color: textColorMap[city.VirusType],
-            },
-            position: { x: cityX, y: cityY },
+            id: `e${city.Name}-${link}`,
+            source: city.Name,
+            target: link,
+            type: 'straight',
+            animated: true,
           })
-          city.Links.forEach((link) => {
-            if (!elements.some(c => c.id === `e${link}-${city.Name}`)) {
-              elements.push({
-                id: `e${city.Name}-${link}`,
-                source: city.Name,
-                target: link,
-                type: 'straight',
-                animated: true,
-              })
-            }
-          })
-          if (city.Buildings.ResearchBuilding) {
-            elements.push({
-              id: `r${city.Name}`,
-              data: { label: "" },
-              style: {
-                width: "1px",
-                height: "1px",
-                background: "white",
-              },
-              position: {
-                x: cityX - 20,
-                y: cityY + 5,
-              },
-            })
-          }
-
-          Object.keys(city.VirusCounts).forEach((vName) => {
-            for (let i = 0; i < city.VirusCounts[vName]; i++) {
-              elements.push({
-                id: `v${city.Name}-${vName}-${i}`,
-                data: { label: "" },
-                style: {
-                  width: "20px",
-                  height: "20px",
-                  background: vName,
-                },
-                position: {
-                  x: cityX - 15 + 15 * xMap[vName] + 15 * i,
-                  y: cityY + 15 * yMap[vName],
-                },
-              })
-            }
-          })
+        }
+      })
+      if (city.Buildings.ResearchBuilding) {
+        elements.push({
+          id: `r${city.Name}`,
+          data: { label: "" },
+          style: {
+            width: "1px",
+            height: "1px",
+            background: "white",
+          },
+          position: {
+            x: cityX - 20,
+            y: cityY + 5,
+          },
         })
+      }
 
-        state.Players.forEach((player) => {
-          const pName = player.Name
-          const cityName = player.Location
-          const cityX = citypos[cityName].x * 150
-          const cityY = citypos[cityName].y * 100
+      Object.keys(city.VirusCounts).forEach((vName) => {
+        for (let i = 0; i < city.VirusCounts[vName]; i++) {
           elements.push({
-            id: `p${pName}`,
+            id: `v${city.Name}-${vName}-${i}`,
             data: { label: "" },
             style: {
-              width: "1px",
-              height: "1px",
-              background: pMap[pName],
+              width: "20px",
+              height: "20px",
+              background: vName,
             },
             position: {
-              x: cityX + 80,
-              y: cityY - 10 + 10 * pPos[pName],
+              x: cityX - 15 + 15 * xMap[vName] + 15 * i,
+              y: cityY + 15 * yMap[vName],
             },
           })
-
-        })
-
-
-        this.setState({ elements, game: input })
+        }
       })
+    })
+
+    state.Players.forEach((player) => {
+      const pName = player.Name
+      const cityName = player.Location
+      const cityX = citypos[cityName].x * 150
+      const cityY = citypos[cityName].y * 100
+      elements.push({
+        id: `p${pName}`,
+        data: { label: "" },
+        style: {
+          width: "1px",
+          height: "1px",
+          background: pMap[pName],
+        },
+        position: {
+          x: cityX + 80,
+          y: cityY - 10 + 10 * pPos[pName],
+        },
+      })
+
+    })
+
+
+    this.setState({ elements, game: input })
+  }
+
+  onLoad(reactFlowInstance) {
+    return fetch(`${BACKEND}/state`)
+      .then(res => res.json())
+      .then(res => this.updateState(res))
       .then(() => setTimeout(() => {
         reactFlowInstance.fitView()
       }, 1))
@@ -197,6 +201,8 @@ class App extends React.Component {
   }
 
   cureButton(playerActions) {
+    if (!playerActions.cure) return null
+
     return (
       <DropdownButton
         size="lg"
@@ -214,6 +220,8 @@ class App extends React.Component {
   }
 
   infectButton(playerActions) {
+    if (!playerActions.infect) return null
+
     return (
       <Button
         onClick={() => this.click("infect-self")}
@@ -229,6 +237,7 @@ class App extends React.Component {
   }
 
   epidemicButton(playerActions) {
+    if (!playerActions.epidemic) return null
     return (
       <Button
         onClick={() => this.click("epidemic-self")}
@@ -244,12 +253,14 @@ class App extends React.Component {
   }
 
   drawButton(playerActions) {
+    if (!playerActions.draw) return null
+
     return (
       <Button
         onClick={() => this.click("draw-self")}
         size="lg"
         title="draw"
-        // disabled={!playerActions.draw}
+        disabled={!playerActions.draw}
         as={ButtonGroup}
       >
         draw
@@ -258,9 +269,10 @@ class App extends React.Component {
   }
 
   outbreakButton(playerActions) {
+    if (!playerActions.outbreak) return null
     return (
       <Button
-        onClick={() => this.click("outbreak-self")}
+        onClick={() => this.click(`outbreak-${playerActions.outbreak}`)}
         variant="warning"
         size="lg"
         title="outbreak"
@@ -272,17 +284,19 @@ class App extends React.Component {
     )
   }
 
-  reseachButton(playerActions) {
+  researchButton(playerActions) {
+    if (!playerActions.research) return null
+
     return (
       <DropdownButton
         size="lg"
         drop="down"
-        title="reseach"
-        disabled={!playerActions.reseach}
+        title="research"
+        disabled={!playerActions.research}
         as={ButtonGroup}
         onSelect={this.click}
       >
-        {playerActions.reseach && playerActions.reseach.map((city) => {
+        {playerActions.research && playerActions.research.map((city) => {
           return <Dropdown.Item key={city} eventKey={`research-${city}`}>{city}</Dropdown.Item>
         })}
       </DropdownButton>
@@ -290,6 +304,8 @@ class App extends React.Component {
   }
 
   getButton(playerActions) {
+    if (!playerActions.get) return null
+
     return (
       <DropdownButton
         size="lg"
@@ -305,45 +321,47 @@ class App extends React.Component {
       </DropdownButton>
     )
   }
-
+  hand(gameState, player, playerActions) {
+    return player.Hand.Cards.map((card) => {
+      return (
+          <DropdownButton
+            variant={card.VirusType.toLowerCase()}
+            size="lg"
+            drop="up"
+            key={card.Name}
+            as={ButtonGroup}
+            title={card.Name}
+            onSelect={this.click}
+          >
+            {playerActions.flyTo && playerActions.flyTo.includes(card.Name) ? <Dropdown.Item key={`flyTo-${card.Name}`} eventKey={`flyTo-${card.Name}`}>Fly</Dropdown.Item> : null}
+            {playerActions.build && playerActions.build.includes(`${card.Name}:ResearchBuilding`) ? <Dropdown.Item key={`build-${card.Name}`} eventKey={`build-${card.Name}:ResearchBuilding`}>Build</Dropdown.Item> : null}
+            {playerActions.flyAnywhere && playerActions.flyAnywhere.includes(card.Name) ? <Dropdown.Item key={`flyAnywhere-${card.Name}`} eventKey={`flyAnywhere-${card.Name}`}>Build</Dropdown.Item> : null}
+            {playerActions.discard && playerActions.discard.includes(card.Name) ? <Dropdown.Item key={`discard-${card.Name}`} eventKey={`discard-${card.Name}`}>Discard</Dropdown.Item> : null}
+            {playerActions.give && playerActions.give.includes(card.Name) ? <Dropdown.Item key={`give-${card.Name}`} eventKey={`give-${card.Name}`}>Give</Dropdown.Item> : null}
+          </DropdownButton>
+      )
+    })
+  }
   actions() {
     if (!this.state.game) return null
-    const player = this.state.game.State.Players[this.state.game.State.CurrentPlayerN]
+    const gameState = this.state.game.State
+    const player = gameState.Players[gameState.CurrentPlayerN]
     const playerActions = this.state.game.Actions[player.Name]
 
     return (
       <div>
-        <h1>Player {player.Name}</h1>
-        {player.Hand.Cards.map((card) => {
-          return (
-            <DropdownButton
-              variant={card.VirusType.toLowerCase()}
-              size="lg"
-              drop="up"
-              key={card.Name}
-              as={ButtonGroup}
-              title={card.Name}
-              onSelect={this.click}
-            >
-              {playerActions.flyTo && playerActions.flyTo.includes(card.Name) ? <Dropdown.Item key={`flyTo-${card.Name}`} eventKey={`flyTo-${card.Name}`}>Fly</Dropdown.Item> : null}
-              {playerActions.build && playerActions.build.includes(card.Name) ? <Dropdown.Item key={`build-${card.Name}`} eventKey={`build-${card.Name}`}>Build</Dropdown.Item> : null}
-              {playerActions.flyAnywhere && playerActions.flyAnywhere.includes(card.Name) ? <Dropdown.Item key={`flyAnywhere-${card.Name}`} eventKey={`flyAnywhere-${card.Name}`}>Build</Dropdown.Item> : null}
-              {playerActions.discard && playerActions.discard.includes(card.Name) ? <Dropdown.Item key={`discard-${card.Name}`} eventKey={`discard-${card.Name}`}>Build</Dropdown.Item> : null}
-              {playerActions.give && playerActions.give.includes(card.Name) ? <Dropdown.Item key={`give-${card.Name}`} eventKey={`give-${card.Name}`}>Give</Dropdown.Item> : null}
-            </DropdownButton>
-          )
-        })}
+        <h1>Player {player.Name}: Actions {gameState.ActionCount}</h1>
+        {this.hand(gameState, player, playerActions)}
         <br />
-        {this.moveButton(playerActions)}
+        {playerActions.discard ? "Select Card to Discard" : null}
         {this.cureButton(playerActions)}
         {this.getButton(playerActions)}
-        {this.reseachButton(playerActions)}
+        {this.researchButton(playerActions)}
+        {this.moveButton(playerActions)}
+        <br />
         {this.epidemicButton(playerActions)}
-        <br />
         {this.drawButton(playerActions)}
-        <br />
         {this.infectButton(playerActions)}
-        <br />
         {this.outbreakButton(playerActions)}
       </div>
     )
