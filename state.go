@@ -53,12 +53,12 @@ const (
 	BuildAction       Action = "build"
 	DiscardAction     Action = "discard"
 	InfectAction      Action = "infect"
-	DrawPAction       Action = "drawP"
+	DrawAction        Action = "draw"
 	ResearchAction    Action = "reseach"
 	OutbreakAction    Action = "outbreak"
 	EpidemicAction    Action = "epidemic"
-	GiveCardAction    Action = "GiveCard"
-	GetCardAction     Action = "GetCard"
+	GiveCardAction    Action = "give"
+	GetCardAction     Action = "get"
 )
 
 func (a Action) String() string {
@@ -75,8 +75,8 @@ func (s *State) Do(action string, target string) error {
 		s.FlyAnywhereAction(target)
 	case DiscardAction:
 		s.DiscardAction(target)
-	case DrawPAction:
-		s.DrawPAction()
+	case DrawAction:
+		s.DrawAction()
 	case InfectAction:
 		s.InfectAction(1)
 	case CureAction:
@@ -264,7 +264,7 @@ func (s *State) BuildAction(target string) {
 	s.ActionCount--
 }
 
-func (s *State) DrawPAction() {
+func (s *State) DrawAction() {
 	card := s.Decks.PDeck.Draw()
 	s.CurrentPlayer().Hand.AddCard(card)
 	s.DrawCount--
@@ -307,7 +307,7 @@ func (s *State) GetActions() PlayersActions {
 		}
 
 		if s.Step == DrawStep {
-			out[s.CurrentPlayer().Name][DrawPAction] = []string{"draw"}
+			out[s.CurrentPlayer().Name][DrawAction] = []string{"draw"}
 		}
 
 		if s.Step == DiscardStep {

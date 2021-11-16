@@ -42,6 +42,7 @@ const pPos = {
 }
 
 
+const BACKEND = "http://localhost:8080"
 
 class App extends React.Component {
   constructor(props) {
@@ -54,6 +55,17 @@ class App extends React.Component {
     }
     this.getCity = this.getCity.bind(this)
     this.onLoad = this.onLoad.bind(this)
+    this.click = this.click.bind(this)
+  }
+
+  click(e) {
+    const [action, target] = e.split("-")
+    const player = this.state.game.State.Players[this.state.game.State.CurrentPlayerN]
+
+    console.log(action, target)
+    return fetch(`${BACKEND}/action/${action}?player=${player.Name}&target=${target}`, {
+      method: "POST"
+    })
   }
 
   getCity(name, elements = this.state.elements) {
@@ -73,12 +85,11 @@ class App extends React.Component {
 
   onLoad(reactFlowInstance) {
     const elements = []
-    return fetch("http://localhost:8080/state")
+    return fetch(`${BACKEND}/state`)
       .then(res => res.json())
       .then((input) => {
 
         const state = input.State
-        console.log(input.State)
         state.Cities.forEach((city) => {
           const cityX = citypos[city.Name].x * 150
           const cityY = citypos[city.Name].y * 100
@@ -125,12 +136,12 @@ class App extends React.Component {
                 id: `v${city.Name}-${vName}-${i}`,
                 data: { label: "" },
                 style: {
-                  width: "1px",
-                  height: "1px",
+                  width: "20px",
+                  height: "20px",
                   background: vName,
                 },
                 position: {
-                  x: cityX + 15 * xMap[vName] + 15 * i,
+                  x: cityX - 15 + 15 * xMap[vName] + 15 * i,
                   y: cityY + 15 * yMap[vName],
                 },
               })
@@ -152,7 +163,7 @@ class App extends React.Component {
               background: pMap[pName],
             },
             position: {
-              x: cityX + 100,
+              x: cityX + 80,
               y: cityY - 10 + 10 * pPos[pName],
             },
           })
@@ -160,9 +171,7 @@ class App extends React.Component {
         })
 
 
-        this.setState({ elements, game: input }, () => {
-          console.log("state", this.state)
-        })
+        this.setState({ elements, game: input })
       })
       .then(() => setTimeout(() => {
         reactFlowInstance.fitView()
@@ -178,7 +187,7 @@ class App extends React.Component {
         drop="down"
         title="move"
         as={ButtonGroup}
-
+        onSelect={this.click}
       >
         {playerActions.move.map((city) => {
           return <Dropdown.Item key={city} eventKey={`move-${city}`}>{city}</Dropdown.Item>
@@ -195,6 +204,7 @@ class App extends React.Component {
         title="cure"
         disabled={!playerActions.cure}
         as={ButtonGroup}
+        onSelect={this.click}
       >
         {playerActions.cure && playerActions.cure.map((city) => {
           return <Dropdown.Item key={city} eventKey={`cure-${city}`}>{city}</Dropdown.Item>
@@ -206,6 +216,7 @@ class App extends React.Component {
   infectButton(playerActions) {
     return (
       <Button
+        onClick={() => this.click("infect-self")}
         variant="success"
         size="lg"
         title="infect"
@@ -220,6 +231,7 @@ class App extends React.Component {
   epidemicButton(playerActions) {
     return (
       <Button
+        onClick={() => this.click("epidemic-self")}
         variant="success"
         size="lg"
         title="epidemic"
@@ -234,9 +246,10 @@ class App extends React.Component {
   drawButton(playerActions) {
     return (
       <Button
+        onClick={() => this.click("draw-self")}
         size="lg"
         title="draw"
-        disabled={!playerActions.draw}
+        // disabled={!playerActions.draw}
         as={ButtonGroup}
       >
         draw
@@ -247,6 +260,7 @@ class App extends React.Component {
   outbreakButton(playerActions) {
     return (
       <Button
+        onClick={() => this.click("outbreak-self")}
         variant="warning"
         size="lg"
         title="outbreak"
@@ -266,6 +280,7 @@ class App extends React.Component {
         title="reseach"
         disabled={!playerActions.reseach}
         as={ButtonGroup}
+        onSelect={this.click}
       >
         {playerActions.reseach && playerActions.reseach.map((city) => {
           return <Dropdown.Item key={city} eventKey={`research-${city}`}>{city}</Dropdown.Item>
@@ -282,6 +297,7 @@ class App extends React.Component {
         title="get"
         disabled={!playerActions.get}
         as={ButtonGroup}
+        onSelect={this.click}
       >
         {playerActions.get && playerActions.get.map((city) => {
           return <Dropdown.Item key={city} eventKey={`get-${city}`}>{city}</Dropdown.Item>
@@ -299,7 +315,6 @@ class App extends React.Component {
       <div>
         <h1>Player {player.Name}</h1>
         {player.Hand.Cards.map((card) => {
-          console.log(playerActions.flyTo.includes(card.Name))
           return (
             <DropdownButton
               variant={card.VirusType.toLowerCase()}
@@ -308,12 +323,13 @@ class App extends React.Component {
               key={card.Name}
               as={ButtonGroup}
               title={card.Name}
+              onSelect={this.click}
             >
               {playerActions.flyTo && playerActions.flyTo.includes(card.Name) ? <Dropdown.Item key={`flyTo-${card.Name}`} eventKey={`flyTo-${card.Name}`}>Fly</Dropdown.Item> : null}
               {playerActions.build && playerActions.build.includes(card.Name) ? <Dropdown.Item key={`build-${card.Name}`} eventKey={`build-${card.Name}`}>Build</Dropdown.Item> : null}
               {playerActions.flyAnywhere && playerActions.flyAnywhere.includes(card.Name) ? <Dropdown.Item key={`flyAnywhere-${card.Name}`} eventKey={`flyAnywhere-${card.Name}`}>Build</Dropdown.Item> : null}
               {playerActions.discard && playerActions.discard.includes(card.Name) ? <Dropdown.Item key={`discard-${card.Name}`} eventKey={`discard-${card.Name}`}>Build</Dropdown.Item> : null}
-              {playerActions.giveCard && playerActions.giveCard.includes(card.Name) ? <Dropdown.Item key={`giveCard-${card.Name}`} eventKey={`giveCard-${card.Name}`}>Give</Dropdown.Item> : null}
+              {playerActions.give && playerActions.give.includes(card.Name) ? <Dropdown.Item key={`give-${card.Name}`} eventKey={`give-${card.Name}`}>Give</Dropdown.Item> : null}
             </DropdownButton>
           )
         })}

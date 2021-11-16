@@ -219,7 +219,8 @@ func main() {
 			return
 		}
 		if err := state.Do(action, target); err != nil {
-			c.JSON(500, err)
+			fmt.Printf("ERROR %s\n", err)
+			c.JSON(500, err.Error())
 			return
 		}
 		c.JSON(200, "OK")
