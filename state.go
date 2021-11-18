@@ -49,18 +49,16 @@ const (
 	MoveAction        Action = "move"
 	FlyAnywhereAction Action = "flyAnywhere"
 	FlyToAction       Action = "flyTo"
-
-	ShuttleAction  Action = "suttle" //TODO impliment research travel
-	CureAction     Action = "cure"
-	BuildAction    Action = "build"
-	DiscardAction  Action = "discard"
-	InfectAction   Action = "infect"
-	DrawAction     Action = "draw"
-	ResearchAction Action = "research"
-	OutbreakAction Action = "outbreak"
-	EpidemicAction Action = "epidemic"
-	GiveCardAction Action = "give"
-	GetCardAction  Action = "get"
+	CureAction        Action = "cure"
+	BuildAction       Action = "build"
+	DiscardAction     Action = "discard"
+	InfectAction      Action = "infect"
+	DrawAction        Action = "draw"
+	ResearchAction    Action = "research"
+	OutbreakAction    Action = "outbreak"
+	EpidemicAction    Action = "epidemic"
+	GiveCardAction    Action = "give"
+	GetCardAction     Action = "get"
 )
 
 func (a Action) String() string {
@@ -324,7 +322,14 @@ func (s *State) GetActions() PlayersActions {
 	for _, player := range s.Players {
 		if player.Name == s.CurrentPlayer().Name && s.Step == ActionStep && !hasOutbreak && !hasEpidemic {
 			playerCity := s.Cities.FindByName(player.Location)
+			out[player.Name][MoveAction] = playerCity.Links
+
 			if playerCity.Buildings[ResearchBuilding] {
+				citiesWithResearch := s.Cities.GetAllWithBuilding(ResearchBuilding).FilterOne(player.Location)
+				if len(citiesWithResearch) > 0 {
+					out[player.Name][MoveAction] = append(out[player.Name][MoveAction], citiesWithResearch.CityNames()...)
+				}
+
 				groups := player.Hand.HasN(5)
 				for virus, deck := range groups {
 					if s.Viruses[virus] != NoneVirusStatus {
@@ -334,7 +339,6 @@ func (s *State) GetActions() PlayersActions {
 					out[player.Name][ResearchAction] = append(out[player.Name][ResearchAction], strings.Join(r, ":"))
 				}
 			}
-			out[player.Name][MoveAction] = playerCity.Links
 			if playerCity.HasVirus() {
 				cureing := []string{}
 				for virusName := range playerCity.GetActive() {

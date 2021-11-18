@@ -9,12 +9,12 @@ const (
 	Black  VirusType = "Black"
 )
 
-type VirusStatus int
+type VirusStatus string
 
 const (
-	NoneVirusStatus VirusStatus = iota
-	CuredVirusStatus
-	EradicatedVirusStatus
+	NoneVirusStatus       VirusStatus = "exists"
+	CuredVirusStatus      VirusStatus = "cured"
+	EradicatedVirusStatus VirusStatus = "eradicated"
 )
 
 type Viruses map[VirusType]VirusStatus

@@ -4,7 +4,7 @@ import ReactFlow from 'react-flow-renderer';
 
 import citypos from './citypos.json'
 import React from 'react';
-import { ButtonGroup, Dropdown, Button, DropdownButton } from 'react-bootstrap';
+import { Form, ButtonGroup, Dropdown, Button, DropdownButton, Container, Row, Col } from 'react-bootstrap';
 
 
 const textColorMap = {
@@ -297,7 +297,14 @@ class App extends React.Component {
         onSelect={this.click}
       >
         {playerActions.research && playerActions.research.map((city) => {
-          return <Dropdown.Item key={city} eventKey={`research-${city}`}>{city}</Dropdown.Item>
+          return <Dropdown.Item diabled key={city} eventKey={`research-${city}`}>
+          <Form.Check 
+            type="checkbox"
+            id={`default-checkbox`}
+            label={`default checkbox`}
+          />
+             {city}
+             </Dropdown.Item>
         })}
       </DropdownButton>
     )
@@ -321,9 +328,20 @@ class App extends React.Component {
       </DropdownButton>
     )
   }
-  hand(gameState, player, playerActions) {
+
+  giveCardAction(playerActions, card) {
+    if (!playerActions.give)  return null
+
+    return playerActions.give.filter(s => s.includes(card.Name)).map((target) => {
+      return <Dropdown.Item key={`give-${target}`} eventKey={`give-${target}`}>Give to {target.split(":")[1]}</Dropdown.Item>
+    })
+  }
+  
+  hand(player, playerActions) {
+    const isDisabled = playerActions.flyTo || playerActions.build || playerActions.flyAnywhere || playerActions.discard || playerActions.give
     return player.Hand.Cards.map((card) => {
       return (
+        <Col>
           <DropdownButton
             variant={card.VirusType.toLowerCase()}
             size="lg"
@@ -331,45 +349,93 @@ class App extends React.Component {
             key={card.Name}
             as={ButtonGroup}
             title={card.Name}
+            disabled={!isDisabled}
             onSelect={this.click}
           >
             {playerActions.flyTo && playerActions.flyTo.includes(card.Name) ? <Dropdown.Item key={`flyTo-${card.Name}`} eventKey={`flyTo-${card.Name}`}>Fly</Dropdown.Item> : null}
             {playerActions.build && playerActions.build.includes(`${card.Name}:ResearchBuilding`) ? <Dropdown.Item key={`build-${card.Name}`} eventKey={`build-${card.Name}:ResearchBuilding`}>Build</Dropdown.Item> : null}
             {playerActions.flyAnywhere && playerActions.flyAnywhere.includes(card.Name) ? <Dropdown.Item key={`flyAnywhere-${card.Name}`} eventKey={`flyAnywhere-${card.Name}`}>Build</Dropdown.Item> : null}
             {playerActions.discard && playerActions.discard.includes(card.Name) ? <Dropdown.Item key={`discard-${card.Name}`} eventKey={`discard-${card.Name}`}>Discard</Dropdown.Item> : null}
-            {playerActions.give && playerActions.give.includes(card.Name) ? <Dropdown.Item key={`give-${card.Name}`} eventKey={`give-${card.Name}`}>Give</Dropdown.Item> : null}
+            {this.giveCardAction(playerActions, card)}
           </DropdownButton>
+        </Col>
       )
     })
   }
   actions() {
-    if (!this.state.game) return null
     const gameState = this.state.game.State
     const player = gameState.Players[gameState.CurrentPlayerN]
     const playerActions = this.state.game.Actions[player.Name]
 
     return (
-      <div>
-        <h1>Player {player.Name}: Actions {gameState.ActionCount}</h1>
-        {this.hand(gameState, player, playerActions)}
-        <br />
+      <Container>
+        <Row>
+          <h1>Player {player.Name}: Actions {gameState.ActionCount}</h1>
+        </Row>
+        <Row>
+          {this.hand(player, playerActions)}
+        </Row>
         {playerActions.discard ? "Select Card to Discard" : null}
-        {this.cureButton(playerActions)}
-        {this.getButton(playerActions)}
-        {this.researchButton(playerActions)}
-        {this.moveButton(playerActions)}
-        <br />
-        {this.epidemicButton(playerActions)}
-        {this.drawButton(playerActions)}
-        {this.infectButton(playerActions)}
-        {this.outbreakButton(playerActions)}
-      </div>
+        <Row>
+          <Col> {this.moveButton(playerActions)} </Col>
+          <Col>{this.cureButton(playerActions)}</Col>
+          <Col> {this.getButton(playerActions)} </Col>
+          <Col> {this.researchButton(playerActions)} </Col>
+        </Row>
+        <Row>
+          <Col> {this.epidemicButton(playerActions)} </Col>
+          <Col> {this.drawButton(playerActions)} </Col>
+          <Col> {this.infectButton(playerActions)} </Col>
+          <Col> {this.outbreakButton(playerActions)} </Col>
+        </Row>
+      </Container>
+    )
+  }
+
+  virusCounts() {
+    const virus = this.state.game.State.Viruses
+    console.log(virus)
+
+    return (<Container>
+      <Row>
+        Red: {virus.Red}
+      </Row>
+      <Row>
+        Yellow: {virus.Yellow}
+      </Row>
+      <Row>
+        Blue: {virus.Blue}
+      </Row>
+      <Row>
+        Black: {virus.Black}
+      </Row>
+    </Container>)
+  }
+
+  inputs() {
+    if (!this.state.game) return null
+    return (
+      <Container>
+        <Row>
+          <Col>
+            {this.virusCounts()}
+          </Col>
+          <Col xs={8} className="Actions">
+            {this.actions()}
+          </Col>
+          <Col>
+            Num Outbreaks left: {7 - this.state.game.State.OutbreakCount}
+          </Col>
+        </Row>
+      </Container>
     )
   }
   render() {
+    // TODO show viturs cure status
+    // TODO show lost
     return (
       <div className="App">
-        <div style={{ height: "50vh" }}>
+        <div className="map">
           <ReactFlow
             elements={this.state.elements}
             nodesDraggable={false}
@@ -383,9 +449,8 @@ class App extends React.Component {
             onLoad={this.onLoad}
           />
         </div>
-        <div className="Actions">
-          {this.actions()}
-        </div>
+
+        {this.inputs()}
       </div>
     )
   }

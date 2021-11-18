@@ -87,7 +87,29 @@ func (s Cities) Contains(name string) bool {
 	return false
 }
 
-func (s Cities) Strings() []string {
+func (s Cities) GetAllWithBuilding(b Building) Cities {
+	out := Cities{}
+	for _, city := range s {
+		if city.Buildings[b] {
+			out = append(out, city)
+		}
+	}
+
+	return out
+}
+
+func (s Cities) FilterOne(cityName string) Cities {
+	out := Cities{}
+	for _, city := range s {
+		if city.Name != cityName {
+			out = append(out, city)
+		}
+	}
+
+	return out
+}
+
+func (s Cities) CityNames() []string {
 	cities := []string{}
 	for _, city := range s {
 		cities = append(cities, city.Name)
