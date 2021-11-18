@@ -110,8 +110,9 @@ func genPlayers(playerCount int, startLocation string, pDeck *Deck) Players {
 
 	for i := 0; i < playerCount; i++ {
 		player := &Player{
-			Name:     fmt.Sprint("P", i),
-			Location: startLocation,
+			Name:      fmt.Sprint("P", i),
+			Location:  startLocation,
+			CureCount: 5,
 		}
 		players = append(players, player)
 		for i := 0; i < 6-playerCount; i++ {
@@ -229,7 +230,7 @@ func main() {
 		}
 		if err := state.Do(action, target); err != nil {
 			fmt.Printf("ERROR %s\n", err)
-			c.JSON(500, err.Error())
+			c.JSON(500, ErrorRes(err.Error()))
 			return
 		}
 		c.JSON(200, map[string]interface{}{

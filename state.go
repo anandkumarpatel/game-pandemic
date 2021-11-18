@@ -119,8 +119,9 @@ func (s *State) ResearchAction(target string) error {
 	split := strings.Split(target, ":")
 	virusName := split[0]
 	cureCount := s.CurrentPlayer().CureCount
+	fmt.Printf("Cure counts %d, %t, %d, %d", cureCount, (len(split) < cureCount+1), len(split), cureCount+1)
 	if len(split) < cureCount+1 {
-		return fmt.Errorf("require $d cards for research", cureCount)
+		return fmt.Errorf("require %d cards for research", cureCount)
 	}
 	for i := 1; i < cureCount; i++ {
 		card := s.CurrentPlayer().Hand.RemoveCard(split[i])

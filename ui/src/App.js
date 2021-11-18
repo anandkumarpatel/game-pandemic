@@ -52,7 +52,7 @@ class App extends React.Component {
     this.state = {
       elements,
       game: null,
-      isResearch: false,
+      researchTarget: false,
       researchCards: [],
     }
 
@@ -71,12 +71,13 @@ class App extends React.Component {
       method: "POST"
     })
       .then(res => res.json())
-      .then((res) => {
-        if (res.Error) {
-          throw new Error(res.Error)
+      .then((data) => {
+        if (data.Error) {
+          throw new Error(data.Error)
         }
+        return data
       })
-      .then(res => this.updateState(res))
+      .then(data => this.updateState(data))
       .catch(error => {
         alert(`Request failed: ${error}`)
       })
@@ -98,6 +99,7 @@ class App extends React.Component {
   }
 
   updateState(input) {
+    console.log("updateState", input)
     const elements = []
     const state = input.State
     state.Cities.forEach((city) => {
@@ -295,32 +297,6 @@ class App extends React.Component {
     )
   }
 
-  researchClick() {
-    if (!this.state.isResearch) {
-      return this.setState({
-        isResearch: true, researchCards: [],
-      })
-    }
-    const cards = this.state.researchCards.join(":")
-    this.click(`research-${cards}`)
-  }
-
-  researchButton(playerActions) {
-    if (!playerActions.research) return null
-
-    return (
-      <Button
-        size="lg"
-        drop="down"
-        title="research"
-        disabled={!playerActions.research}
-        onClick={(e) => this.researchClick(e)}
-      >
-        Research
-      </Button>
-    )
-  }
-
   getButton(playerActions) {
     if (!playerActions.get) return null
 
@@ -352,9 +328,7 @@ class App extends React.Component {
     const gameState = this.state.game.State
     const player = gameState.Players[gameState.CurrentPlayerN]
     const playerActions = this.state.game.Actions[player.Name]
-    if (this.state.isResearch) {
-      return
-    }
+
     return (
       <React.Fragment>
         {playerActions.flyTo && playerActions.flyTo.includes(card.Name) ? <Dropdown.Item key={`flyTo-${card.Name}`} eventKey={`flyTo-${card.Name}`}>Fly</Dropdown.Item> : null}
@@ -366,10 +340,86 @@ class App extends React.Component {
     )
   }
 
+  researchClick(virusName) {
+    if (!this.state.researchTarget) {
+      return this.setState({
+        researchTarget: virusName, researchCards: [],
+      })
+    }
+    const cards = this.state.researchCards.join(":")
+    return this.setState({ researchTarget: null,  researchCards: []}, () => {
+      return this.click(`research-${virusName}:${cards}`)
+    })
+  }
+
+  researchButton(playerActions) {
+    if (!playerActions.research) return null
+    if (this.state.researchTarget) {
+      return (<Button
+        onClick={() => this.researchClick(this.state.researchTarget)}
+        >
+        Discover Cure
+      </Button>)
+    }
+    return (
+      <DropdownButton
+        size="lg"
+        drop="down"
+        title="research"
+        disabled={!playerActions.research}
+        as={ButtonGroup}
+        onSelect={(e) => this.researchClick(e)}
+      >
+        {playerActions.research && playerActions.research.map((target) => {
+          const virusName = target.split(":")[0]
+          return <Dropdown.Item key={virusName} eventKey={virusName}>{virusName}</Dropdown.Item>
+        })}
+      </DropdownButton>
+    )
+  }
+
+  researchCardClick(cardName) {
+    let researchCards = [...this.state.researchCards, cardName]
+    if (this.state.researchCards.includes(cardName)) {
+      researchCards = researchCards.filter((i) => i !== cardName)
+    }
+    return this.setState({
+      researchCards
+    })
+  }
+
+  researchCardPicker() {
+    const gameState = this.state.game.State
+    const player = gameState.Players[gameState.CurrentPlayerN]
+    const playerActions = this.state.game.Actions[player.Name]
+    const cards = playerActions.research.find((target) => {
+      return target.split(":")[0] === this.state.researchTarget
+    }).split(":")
+    cards.shift()
+
+    return cards.map((cardName) => {
+      return (<Col>
+        <Button
+          variant={this.state.researchCards.includes(cardName) ? "success" : "dark"}
+          size="lg"
+          key={cardName}
+          as={ButtonGroup}
+          title={cardName}
+          onClick={() => this.researchCardClick(cardName)}
+        >
+          {cardName}
+        </Button>
+      </Col>)
+    })
+  }
   hand() {
     const gameState = this.state.game.State
     const player = gameState.Players[gameState.CurrentPlayerN]
     const playerActions = this.state.game.Actions[player.Name]
+
+    if (this.state.researchTarget) {
+      return this.researchCardPicker()
+    }
 
     const isDisabled = playerActions.flyTo || playerActions.build || playerActions.flyAnywhere || playerActions.discard || playerActions.give
     return player.Hand.Cards.map((card) => {
