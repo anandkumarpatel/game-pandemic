@@ -70,11 +70,15 @@ class App extends React.Component {
     return fetch(`${BACKEND}/action/${action}?player=${player.Name}&target=${target}`, {
       method: "POST"
     })
-    .then(res => res.json())
+      .then(res => res.json())
+      .then((res) => {
+        if (res.Error) {
+          throw new Error(res.Error)
+        }
+      })
       .then(res => this.updateState(res))
-      .catch(res => {
-        console.log("Res", JSON.stringify(res))
-        alert(`error: ${res}`)
+      .catch(error => {
+        alert(`Request failed: ${error}`)
       })
   }
 
@@ -337,27 +341,27 @@ class App extends React.Component {
   }
 
   giveCardAction(playerActions, card) {
-    if (!playerActions.give)  return null
+    if (!playerActions.give) return null
 
     return playerActions.give.filter(s => s.includes(card.Name)).map((target) => {
       return <Dropdown.Item key={`give-${target}`} eventKey={`give-${target}`}>Give to {target.split(":")[1]}</Dropdown.Item>
     })
   }
-  
-  cardActions(card){
+
+  cardActions(card) {
     const gameState = this.state.game.State
     const player = gameState.Players[gameState.CurrentPlayerN]
     const playerActions = this.state.game.Actions[player.Name]
-    if(this.state.research) {
-      return 
+    if (this.state.isResearch) {
+      return
     }
-    return ( 
+    return (
       <React.Fragment>
-      {playerActions.flyTo && playerActions.flyTo.includes(card.Name) ? <Dropdown.Item key={`flyTo-${card.Name}`} eventKey={`flyTo-${card.Name}`}>Fly</Dropdown.Item> : null}
-      {playerActions.build && playerActions.build.includes(`${card.Name}:ResearchBuilding`) ? <Dropdown.Item key={`build-${card.Name}`} eventKey={`build-${card.Name}:ResearchBuilding`}>Build</Dropdown.Item> : null}
-      {playerActions.flyAnywhere && playerActions.flyAnywhere.includes(card.Name) ? <Dropdown.Item key={`flyAnywhere-${card.Name}`} eventKey={`flyAnywhere-${card.Name}`}>Build</Dropdown.Item> : null}
-      {playerActions.discard && playerActions.discard.includes(card.Name) ? <Dropdown.Item key={`discard-${card.Name}`} eventKey={`discard-${card.Name}`}>Discard</Dropdown.Item> : null}
-      {this.giveCardAction(playerActions, card)}
+        {playerActions.flyTo && playerActions.flyTo.includes(card.Name) ? <Dropdown.Item key={`flyTo-${card.Name}`} eventKey={`flyTo-${card.Name}`}>Fly</Dropdown.Item> : null}
+        {playerActions.build && playerActions.build.includes(`${card.Name}:ResearchBuilding`) ? <Dropdown.Item key={`build-${card.Name}`} eventKey={`build-${card.Name}:ResearchBuilding`}>Build</Dropdown.Item> : null}
+        {playerActions.flyAnywhere && playerActions.flyAnywhere.includes(card.Name) ? <Dropdown.Item key={`flyAnywhere-${card.Name}`} eventKey={`flyAnywhere-${card.Name}`}>Build</Dropdown.Item> : null}
+        {playerActions.discard && playerActions.discard.includes(card.Name) ? <Dropdown.Item key={`discard-${card.Name}`} eventKey={`discard-${card.Name}`}>Discard</Dropdown.Item> : null}
+        {this.giveCardAction(playerActions, card)}
       </React.Fragment>
     )
   }

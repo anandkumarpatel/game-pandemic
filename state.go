@@ -84,7 +84,7 @@ func (s *State) Do(action string, target string) error {
 	case BuildAction:
 		s.BuildAction(target)
 	case ResearchAction:
-		s.ResearchAction(target)
+		return s.ResearchAction(target)
 	case OutbreakAction:
 		s.OutbreakAction(target)
 	case EpidemicAction:
@@ -114,11 +114,15 @@ func (s State) CurrentPlayer() *Player {
 	return s.Players[s.CurrentPlayerN]
 }
 
-func (s *State) ResearchAction(target string) {
+func (s *State) ResearchAction(target string) error {
 	// First split is always virus
 	split := strings.Split(target, ":")
 	virusName := split[0]
-	for i := 1; i < len(split); i++ {
+	cureCount := s.CurrentPlayer().CureCount
+	if len(split) < cureCount+1 {
+		return fmt.Errorf("require $d cards for research", cureCount)
+	}
+	for i := 1; i < cureCount; i++ {
 		card := s.CurrentPlayer().Hand.RemoveCard(split[i])
 		s.Decks.PDiscard.AddCard(card)
 	}
@@ -129,6 +133,7 @@ func (s *State) ResearchAction(target string) {
 		s.Viruses[v] = EradicatedVirusStatus
 	}
 	s.ActionCount--
+	return nil
 }
 
 func (s *State) MoveAction(cityName string) {

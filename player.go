@@ -7,9 +7,10 @@ import (
 type Players []*Player
 
 type Player struct {
-	Name     string
-	Location string
-	Hand     Deck
+	Name      string
+	Location  string
+	Hand      Deck
+	CureCount int
 }
 
 func (s Player) String() string {
