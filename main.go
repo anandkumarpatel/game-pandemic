@@ -184,6 +184,18 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
+func ErrorRes(err string) map[string]interface{} {
+	return map[string]interface{}{
+		"Error": err,
+	}
+}
+
+func StateRes(state *State) map[string]interface{} {
+	return map[string]interface{}{
+		"State":   state,
+		"Actions": state.GetActions(),
+	}
+}
 func main() {
 	state := &State{}
 	err := state.Load()
@@ -194,10 +206,7 @@ func main() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 	r.GET("/state", func(c *gin.Context) {
-		c.JSON(200, map[string]interface{}{
-			"State":   state,
-			"Actions": state.GetActions(),
-		})
+		c.JSON(200, StateRes(state))
 	})
 	r.GET("/actions", func(c *gin.Context) {
 		c.JSON(200, state.GetActions())
@@ -205,17 +214,17 @@ func main() {
 	r.POST("/action/:action", func(c *gin.Context) {
 		action := c.Param("action")
 		if action == "" {
-			c.JSON(403, "missing action")
+			c.JSON(400, ErrorRes("missing action"))
 			return
 		}
 		player := c.Query("player")
 		if player == "" {
-			c.JSON(403, "missing player")
+			c.JSON(400, ErrorRes("missing player"))
 			return
 		}
 		target := c.Query("target")
 		if target == "" {
-			c.JSON(403, "missing target")
+			c.JSON(400, ErrorRes("missing target"))
 			return
 		}
 		if err := state.Do(action, target); err != nil {

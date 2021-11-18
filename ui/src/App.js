@@ -51,8 +51,11 @@ class App extends React.Component {
     let elements = [];
     this.state = {
       elements,
-      game: null
+      game: null,
+      isResearch: false,
+      researchCards: [],
     }
+
     this.getCity = this.getCity.bind(this)
     this.onLoad = this.onLoad.bind(this)
     this.click = this.click.bind(this)
@@ -63,12 +66,16 @@ class App extends React.Component {
     const [action, target] = e.split("-")
     const player = this.state.game.State.Players[this.state.game.State.CurrentPlayerN]
 
-    console.log(action, target)
+    console.log("sending action", action, target)
     return fetch(`${BACKEND}/action/${action}?player=${player.Name}&target=${target}`, {
       method: "POST"
     })
-      .then(res => res.json())
+    .then(res => res.json())
       .then(res => this.updateState(res))
+      .catch(res => {
+        console.log("Res", JSON.stringify(res))
+        alert(`error: ${res}`)
+      })
   }
 
   getCity(name, elements = this.state.elements) {
@@ -180,7 +187,7 @@ class App extends React.Component {
       .then(() => setTimeout(() => {
         reactFlowInstance.fitView()
       }, 1))
-      .catch(e => console.log("error", e))
+      .catch(e => console.error("onLoad error", e))
   }
 
   moveButton(playerActions) {
@@ -284,29 +291,29 @@ class App extends React.Component {
     )
   }
 
+  researchClick() {
+    if (!this.state.isResearch) {
+      return this.setState({
+        isResearch: true, researchCards: [],
+      })
+    }
+    const cards = this.state.researchCards.join(":")
+    this.click(`research-${cards}`)
+  }
+
   researchButton(playerActions) {
     if (!playerActions.research) return null
 
     return (
-      <DropdownButton
+      <Button
         size="lg"
         drop="down"
         title="research"
         disabled={!playerActions.research}
-        as={ButtonGroup}
-        onSelect={this.click}
+        onClick={(e) => this.researchClick(e)}
       >
-        {playerActions.research && playerActions.research.map((city) => {
-          return <Dropdown.Item diabled key={city} eventKey={`research-${city}`}>
-          <Form.Check 
-            type="checkbox"
-            id={`default-checkbox`}
-            label={`default checkbox`}
-          />
-             {city}
-             </Dropdown.Item>
-        })}
-      </DropdownButton>
+        Research
+      </Button>
     )
   }
 
@@ -337,7 +344,29 @@ class App extends React.Component {
     })
   }
   
-  hand(player, playerActions) {
+  cardActions(card){
+    const gameState = this.state.game.State
+    const player = gameState.Players[gameState.CurrentPlayerN]
+    const playerActions = this.state.game.Actions[player.Name]
+    if(this.state.research) {
+      return 
+    }
+    return ( 
+      <React.Fragment>
+      {playerActions.flyTo && playerActions.flyTo.includes(card.Name) ? <Dropdown.Item key={`flyTo-${card.Name}`} eventKey={`flyTo-${card.Name}`}>Fly</Dropdown.Item> : null}
+      {playerActions.build && playerActions.build.includes(`${card.Name}:ResearchBuilding`) ? <Dropdown.Item key={`build-${card.Name}`} eventKey={`build-${card.Name}:ResearchBuilding`}>Build</Dropdown.Item> : null}
+      {playerActions.flyAnywhere && playerActions.flyAnywhere.includes(card.Name) ? <Dropdown.Item key={`flyAnywhere-${card.Name}`} eventKey={`flyAnywhere-${card.Name}`}>Build</Dropdown.Item> : null}
+      {playerActions.discard && playerActions.discard.includes(card.Name) ? <Dropdown.Item key={`discard-${card.Name}`} eventKey={`discard-${card.Name}`}>Discard</Dropdown.Item> : null}
+      {this.giveCardAction(playerActions, card)}
+      </React.Fragment>
+    )
+  }
+
+  hand() {
+    const gameState = this.state.game.State
+    const player = gameState.Players[gameState.CurrentPlayerN]
+    const playerActions = this.state.game.Actions[player.Name]
+
     const isDisabled = playerActions.flyTo || playerActions.build || playerActions.flyAnywhere || playerActions.discard || playerActions.give
     return player.Hand.Cards.map((card) => {
       return (
@@ -352,16 +381,13 @@ class App extends React.Component {
             disabled={!isDisabled}
             onSelect={this.click}
           >
-            {playerActions.flyTo && playerActions.flyTo.includes(card.Name) ? <Dropdown.Item key={`flyTo-${card.Name}`} eventKey={`flyTo-${card.Name}`}>Fly</Dropdown.Item> : null}
-            {playerActions.build && playerActions.build.includes(`${card.Name}:ResearchBuilding`) ? <Dropdown.Item key={`build-${card.Name}`} eventKey={`build-${card.Name}:ResearchBuilding`}>Build</Dropdown.Item> : null}
-            {playerActions.flyAnywhere && playerActions.flyAnywhere.includes(card.Name) ? <Dropdown.Item key={`flyAnywhere-${card.Name}`} eventKey={`flyAnywhere-${card.Name}`}>Build</Dropdown.Item> : null}
-            {playerActions.discard && playerActions.discard.includes(card.Name) ? <Dropdown.Item key={`discard-${card.Name}`} eventKey={`discard-${card.Name}`}>Discard</Dropdown.Item> : null}
-            {this.giveCardAction(playerActions, card)}
+            {this.cardActions(card)}
           </DropdownButton>
         </Col>
       )
     })
   }
+
   actions() {
     const gameState = this.state.game.State
     const player = gameState.Players[gameState.CurrentPlayerN]
@@ -373,7 +399,7 @@ class App extends React.Component {
           <h1>Player {player.Name}: Actions {gameState.ActionCount}</h1>
         </Row>
         <Row>
-          {this.hand(player, playerActions)}
+          {this.hand()}
         </Row>
         {playerActions.discard ? "Select Card to Discard" : null}
         <Row>
@@ -394,7 +420,6 @@ class App extends React.Component {
 
   virusCounts() {
     const virus = this.state.game.State.Viruses
-    console.log(virus)
 
     return (<Container>
       <Row>
